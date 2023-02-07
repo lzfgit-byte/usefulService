@@ -2,6 +2,7 @@ package com.ilzf.fileShare.controller;
 
 import cn.hutool.core.io.FileUtil;
 import com.ilzf.base.entity.ResultEntity;
+import com.ilzf.fileShare.entity.FileInfoEntity;
 import com.ilzf.utils.FileUtilILZF;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,18 +22,16 @@ public class FileInfoController {
         }
         String name = file.getOriginalFilename();
         assert name != null;
-        String[] split = name.split("\\.");
-        if(!(split.length > 0 && "pdf".equals(split[split.length-1]))){
-            return ResultEntity.error("请上传pdf文件");
-        }
         File target = null;
         try {
-            String filePath = FileUtilILZF.getFileBasePath() + name;
+            String filePath = FileUtilILZF.getUploadFilePath() + name;
             target = new File(filePath);
-            if(target.exists() && !target.delete()){
+            if(FileUtil.exist(target)){
                 return ResultEntity.error("文件已存在");
             }
             file.transferTo(target);
+            FileInfoEntity fileInfoEntity = new FileInfoEntity(file,filePath);
+            System.out.println("22");
         } catch (Exception e) {
             e.printStackTrace();
             return ResultEntity.error();

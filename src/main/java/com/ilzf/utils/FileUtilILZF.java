@@ -13,7 +13,18 @@ public class FileUtilILZF {
         return userInfo.getCurrentDir();
     }
     public static String getUploadFilePath() {
-        String res = getFileBasePath() + "\\files\\";
+        String res = getFileBasePath() + "files\\";
+        File dir = new File(res);
+        int count = 0;
+        if (!dir.exists()) {
+            while (count < 10 && !dir.mkdir()) {
+                count++;
+            }
+        }
+        return res;
+    }
+    public static String getSaveDataPath() {
+        String res = getFileBasePath() + "db\\";
         File dir = new File(res);
         int count = 0;
         if (!dir.exists()) {
