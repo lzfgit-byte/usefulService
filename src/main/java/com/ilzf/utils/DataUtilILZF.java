@@ -24,6 +24,7 @@ import java.util.Map;
  * 将table的名字创建一个文件，然后将新的信息存进去
  */
 public class DataUtilILZF {
+    public static final String DB_SUFFIX = ".data";
     /**
      * 获取类数据的map结构
      *
@@ -77,6 +78,15 @@ public class DataUtilILZF {
         return res;
     }
 
+    public static JSONArray getSavedData(Class<?> cla) {
+        Table tableValue = cla.getDeclaredAnnotation(Table.class);
+        String value = tableValue.value();
+        String tablePath = FileUtilILZF.getSaveDataPath() + value + DB_SUFFIX;
+        File file = new File(tablePath);
+        String dataStr = FileUtil.readString(file, StandardCharsets.UTF_8);
+        return JSONUtil.parseArray(dataStr);
+    }
+
     /**
      * 存储文件
      *
@@ -90,7 +100,7 @@ public class DataUtilILZF {
         if (StringUtilIZLF.isBlankOrEmpty(newUnique)) {
             return false;
         }
-        String tablePath = FileUtilILZF.getSaveDataPath() + tableName + ".data";
+        String tablePath = FileUtilILZF.getSaveDataPath() + tableName + DB_SUFFIX;
         File file = new File(tablePath);
         if (!file.exists()) {
             try {
@@ -108,14 +118,14 @@ public class DataUtilILZF {
         }
         JSONArray array = JSONUtil.parseArray(dataStr);
         final boolean[] isNew = {true};
-        array.forEach(item ->{
-            JSONObject obj = (JSONObject)item;
+        array.forEach(item -> {
+            JSONObject obj = (JSONObject) item;
             Object oldUnique = obj.get(uniqueField);
-            if(isNew[0] && StringUtilIZLF.isNotBlankOrEmpty(oldUnique) && newUnique.equals(oldUnique.toString())){
+            if (isNew[0] && StringUtilIZLF.isNotBlankOrEmpty(oldUnique) && newUnique.equals(oldUnique.toString())) {
                 isNew[0] = false;
             }
         });
-        if(!isNew[0]){
+        if (!isNew[0]) {
             return false;
         }
         array.put(data);
