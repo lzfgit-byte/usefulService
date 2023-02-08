@@ -6,7 +6,10 @@ public class StringUtilIZLF {
         String end = str.substring(1);
         return s.toUpperCase() + end;
     }
-    public static boolean isBlank(Object o){
+    public static boolean isBlankOrEmpty(Object o){
         return o == null || "".equals(o.toString());
+    }
+    public static boolean isNotBlankOrEmpty(Object o){
+        return !isBlankOrEmpty(o);
     }
 }

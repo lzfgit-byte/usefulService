@@ -3,6 +3,7 @@ package com.ilzf.fileShare.entity;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import com.ilzf.base.annotation.Table;
+import com.ilzf.base.annotation.Unique;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +33,7 @@ public class FileInfoEntity {
     //文件名字
     private String name;
     //文件路径
+    @Unique
     private String path;
     //文件大小
     private Long size;
