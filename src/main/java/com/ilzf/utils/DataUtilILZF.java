@@ -85,6 +85,11 @@ public class DataUtilILZF {
      * @return
      */
     public static boolean doSave(String tableName, Map<String, Object> data, Class<?> cla) {
+        String uniqueField = getUniqueFieldList(cla);
+        Object newUnique = data.get(uniqueField);
+        if (StringUtilIZLF.isBlankOrEmpty(newUnique)) {
+            return false;
+        }
         String tablePath = FileUtilILZF.getSaveDataPath() + tableName + ".data";
         File file = new File(tablePath);
         if (!file.exists()) {
@@ -101,8 +106,18 @@ public class DataUtilILZF {
         if (StringUtilIZLF.isBlankOrEmpty(dataStr)) {
             dataStr = "[]";
         }
-        String uniqueField = getUniqueFieldList(cla);
         JSONArray array = JSONUtil.parseArray(dataStr);
+        final boolean[] isNew = {true};
+        array.forEach(item ->{
+            JSONObject obj = (JSONObject)item;
+            Object oldUnique = obj.get(uniqueField);
+            if(isNew[0] && StringUtilIZLF.isNotBlankOrEmpty(oldUnique) && newUnique.equals(oldUnique.toString())){
+                isNew[0] = false;
+            }
+        });
+        if(!isNew[0]){
+            return false;
+        }
         array.put(data);
         String s = JSONUtil.toJsonStr(array, 2);
         FileUtil.writeBytes(s.getBytes(), tablePath);
@@ -119,6 +134,6 @@ public class DataUtilILZF {
 
 
     public static void main(String[] args) {
-        saveData(new FileInfoEntity(new File("D:\\project\\usefulService\\files\\usefulService.zip")));
+        saveData(new FileInfoEntity(new File("D:\\project\\usefulService\\files\\efulService.zip")));
     }
 }
