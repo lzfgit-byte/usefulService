@@ -34,5 +34,5 @@ public class FileInfoEntity {
     //文件路径
     private String path;
     //文件大小
-    private long size;
+    private Long size;
 }

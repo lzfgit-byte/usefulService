@@ -3,12 +3,14 @@ package com.ilzf.fileShare.controller;
 import cn.hutool.core.io.FileUtil;
 import com.ilzf.base.entity.ResultEntity;
 import com.ilzf.fileShare.entity.FileInfoEntity;
+import com.ilzf.utils.DataUtilILZF;
 import com.ilzf.utils.FileUtilILZF;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 @RestController
@@ -22,7 +24,7 @@ public class FileInfoController {
         }
         String name = file.getOriginalFilename();
         assert name != null;
-        File target = null;
+        File target;
         try {
             String filePath = FileUtilILZF.getUploadFilePath() + name;
             target = new File(filePath);
@@ -31,11 +33,19 @@ public class FileInfoController {
             }
             file.transferTo(target);
             FileInfoEntity fileInfoEntity = new FileInfoEntity(file,filePath);
-            System.out.println("22");
+            boolean b = DataUtilILZF.saveData(fileInfoEntity);
+            if(!b){
+                return ResultEntity.error("保存错误");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ResultEntity.error();
         }
         return ResultEntity.success();
+    }
+
+    @RequestMapping("/downloadFile")
+    public void downloadFile(String IdOrName, HttpServletResponse response) {
+
     }
 }
