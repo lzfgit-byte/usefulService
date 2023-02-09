@@ -15,7 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -61,12 +64,8 @@ public class FileShareService {
         });
         JSONObject entries = obj.get();
         String path = StringUtilIZLF.wrapperString(entries.get("path"));
-        FileReader fileReader = FileReader.create(new File(path));
-        try {
-            fileReader.writeToStream(response.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String name = StringUtilIZLF.wrapperString(entries.get("name"));
+        FileUtilILZF.downloadFileToClient(name,new File(path),response);
     }
     public void downloadFilebyPath( String path, HttpServletResponse response) {
         FileReader fileReader = FileReader.create(new File(path));
