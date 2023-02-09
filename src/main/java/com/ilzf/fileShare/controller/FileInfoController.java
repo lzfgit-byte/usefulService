@@ -48,6 +48,15 @@ public class FileInfoController {
     public void downloadFile(@RequestParam(value = "id") String IdOrName, HttpServletResponse response) {
         fileShareService.downloadFile(IdOrName,response);
     }
+    /**
+     * 下载文件
+     * @param path
+     * @param response
+     */
+    @RequestMapping("/downloadFilebyPath")
+    public void downloadFilebyPath(@RequestParam(value = "path") String path, HttpServletResponse response) {
+        fileShareService.downloadFilebyPath(path,response);
+    }
 
     /**
      * 遍历文件

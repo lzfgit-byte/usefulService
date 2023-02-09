@@ -48,7 +48,7 @@ public class FileShareService {
         return ResultEntity.success();
     }
 
-    public void downloadFile(@RequestParam(value = "id") String IdOrName, HttpServletResponse response) {
+    public void downloadFile(String IdOrName, HttpServletResponse response) {
         JSONArray savedData = DataUtilILZF.getSavedData(FileInfoEntity.class);
         AtomicReference<JSONObject> obj = new AtomicReference<>();
         savedData.forEach(item -> {
@@ -61,6 +61,14 @@ public class FileShareService {
         });
         JSONObject entries = obj.get();
         String path = StringUtilIZLF.wrapperString(entries.get("path"));
+        FileReader fileReader = FileReader.create(new File(path));
+        try {
+            fileReader.writeToStream(response.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void downloadFilebyPath( String path, HttpServletResponse response) {
         FileReader fileReader = FileReader.create(new File(path));
         try {
             fileReader.writeToStream(response.getOutputStream());

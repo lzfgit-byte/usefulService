@@ -26,8 +26,6 @@ public class FileInfoEntity {
         this.setSize(file.getSize());
     }
 
-    //ID
-    private String id;
     //文件名字
     private String name;
     //文件路径
