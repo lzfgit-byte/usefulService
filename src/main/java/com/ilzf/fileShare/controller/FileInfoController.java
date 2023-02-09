@@ -6,9 +6,11 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.ilzf.base.entity.ResultEntity;
 import com.ilzf.fileShare.entity.FileInfoEntity;
+import com.ilzf.fileShare.service.FileShareService;
 import com.ilzf.utils.DataUtilILZF;
 import com.ilzf.utils.FileUtilILZF;
 import com.ilzf.utils.StringUtilIZLF;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,58 +19,42 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @RequestMapping("/file")
 public class FileInfoController {
 
+    @Autowired
+    FileShareService fileShareService;
+
+    /**
+     * 上传文件
+     * @param file
+     * @return
+     */
     @RequestMapping("/uploadFile")
     public ResultEntity<?> uploadFile(@RequestParam(value = "file") MultipartFile file) {
-        if (file == null) {
-            return ResultEntity.error();
-        }
-        String name = file.getOriginalFilename();
-        assert name != null;
-        File target;
-        try {
-            String filePath = FileUtilILZF.getUploadFilePath() + name;
-            target = new File(filePath);
-            if (FileUtil.exist(target)) {
-                return ResultEntity.error("文件已存在");
-            }
-            file.transferTo(target);
-            FileInfoEntity fileInfoEntity = new FileInfoEntity(file, filePath);
-            boolean b = DataUtilILZF.saveData(fileInfoEntity);
-            if (!b) {
-                return ResultEntity.error("保存错误");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResultEntity.error();
-        }
-        return ResultEntity.success();
+        return fileShareService.uploadFile(file);
     }
 
+    /**
+     * 下载文件
+     * @param IdOrName
+     * @param response
+     */
     @RequestMapping("/downloadFile")
     public void downloadFile(@RequestParam(value = "id") String IdOrName, HttpServletResponse response) {
-        JSONArray savedData = DataUtilILZF.getSavedData(FileInfoEntity.class);
-        AtomicReference<JSONObject> obj = new AtomicReference<>();
-        savedData.forEach(item -> {
-            JSONObject forObj = (JSONObject) item;
-            String id = StringUtilIZLF.wrapperString(forObj.get("id"));
-            String name = StringUtilIZLF.wrapperString(forObj.get("name"));
-            if(id.equals(IdOrName) || name.equals(IdOrName)){
-                obj.set(forObj);
-            }
-        });
-        JSONObject entries = obj.get();
-        String path = StringUtilIZLF.wrapperString(entries.get("path"));
-        FileReader fileReader = FileReader.create(new File(path));
-        try {
-            fileReader.writeToStream(response.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        fileShareService.downloadFile(IdOrName,response);
+    }
+
+    /**
+     * 遍历文件
+     * @return
+     */
+    @RequestMapping("/listFiles")
+    public ResultEntity<List<FileInfoEntity>> listFiles() {
+       return fileShareService.listFiles();
     }
 }

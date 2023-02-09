@@ -16,13 +16,11 @@ import java.io.File;
 @Table("file")
 public class FileInfoEntity {
     public FileInfoEntity(File file){
-        this.setId(IdUtil.fastSimpleUUID());
         this.setName(file.getName());
         this.setPath(file.getAbsolutePath());
         this.setSize(file.length());
     }
     public FileInfoEntity(MultipartFile file,String path){
-        this.setId(IdUtil.fastSimpleUUID());
         this.setName(file.getOriginalFilename());
         this.setPath(path);
         this.setSize(file.getSize());

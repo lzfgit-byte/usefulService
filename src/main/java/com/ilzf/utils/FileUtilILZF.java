@@ -9,7 +9,7 @@ import java.io.File;
 
 public class FileUtilILZF {
     //存储上传文件的位置
-    public static final String FILE_PATH = "file";
+    public static final String FILE_PATH = "files";
     //存储数据存储的位置
     public static final String DB = "db";
     //配置文件位置
