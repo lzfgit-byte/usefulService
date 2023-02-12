@@ -17,6 +17,8 @@ public class FileUtilILZF {
     public static final String DB = "db";
     //配置文件位置
     public static final String CONFIG_PATH = "config.json";
+    //缓存位置
+    public static final String TEMP = "temp";
 
     /**
      * 获取运行环境的跟目录，没有则创建
@@ -30,6 +32,17 @@ public class FileUtilILZF {
 
     public static String getUploadFilePath() {
         String res = getFileBasePath() + FILE_PATH + "\\";
+        File dir = new File(res);
+        int count = 0;
+        if (!dir.exists()) {
+            while (count < 10 && !dir.mkdir()) {
+                count++;
+            }
+        }
+        return res;
+    }
+    public static String getTempFilePath() {
+        String res = getFileBasePath() + TEMP + "\\";
         File dir = new File(res);
         int count = 0;
         if (!dir.exists()) {
@@ -64,10 +77,6 @@ public class FileUtilILZF {
      */
     public static String getConfigPath() {
         return getFileBasePath() + CONFIG_PATH;
-    }
-
-    public static boolean writeFile(String path, File file) {
-        return true;
     }
 
     public static void downloadFileToClient(String filename,  File file, HttpServletResponse response) {
