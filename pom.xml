@@ -22,6 +22,14 @@
 				<enabled>true</enabled>
 			</releases>
 		</repository>
+		<repository>
+			<id>mirror2</id>
+			<name>ali2</name>
+			<url>https://maven.aliyun.com/repository/public</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
@@ -47,6 +55,11 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.3.3</version>
 		</dependency>
 	</dependencies>
 
