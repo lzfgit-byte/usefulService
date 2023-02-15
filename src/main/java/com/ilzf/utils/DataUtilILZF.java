@@ -78,13 +78,13 @@ public class DataUtilILZF {
         return res;
     }
 
-    public static JSONArray getSavedData(Class<?> cla) {
+    public static JSONObject getSavedData(Class<?> cla) {
         Table tableValue = cla.getDeclaredAnnotation(Table.class);
         String value = tableValue.value();
         String tablePath = FileUtilILZF.getSaveDataPath() + value + DB_SUFFIX;
         File file = new File(tablePath);
         String dataStr = FileUtil.readString(file, StandardCharsets.UTF_8);
-        return JSONUtil.parseArray(dataStr);
+        return JSONUtil.parseObj(dataStr);
     }
 
     /**
@@ -96,8 +96,8 @@ public class DataUtilILZF {
      */
     public static boolean doSave(String tableName, Map<String, Object> data, Class<?> cla) {
         String uniqueField = getUniqueFieldList(cla);
-        Object newUnique = data.get(uniqueField);
-        if (StringUtilIZLF.isBlankOrEmpty(newUnique)) {
+        String uniqueId = StringUtilIZLF.wrapperString(data.get(uniqueField));
+        if (StringUtilIZLF.isBlankOrEmpty(uniqueId)) {
             return false;
         }
         String tablePath = FileUtilILZF.getSaveDataPath() + tableName + DB_SUFFIX;
@@ -114,23 +114,13 @@ public class DataUtilILZF {
         }
         String dataStr = FileUtil.readString(file, StandardCharsets.UTF_8);
         if (StringUtilIZLF.isBlankOrEmpty(dataStr)) {
-            dataStr = "[]";
+            dataStr = "{}";
         }
-        JSONArray array = JSONUtil.parseArray(dataStr);
-        final boolean[] isNew = {true};
-        array.forEach(item -> {
-            JSONObject obj = (JSONObject) item;
-            Object oldUnique = obj.get(uniqueField);
-            if (isNew[0] && StringUtilIZLF.isNotBlankOrEmpty(oldUnique) && newUnique.equals(oldUnique.toString())) {
-                isNew[0] = false;
-            }
-        });
-        if (!isNew[0]) {
-            return false;
-        }
-        array.put(data);
-        String s = JSONUtil.toJsonStr(array, 2);
+        JSONObject obj = JSONUtil.parseObj(dataStr);
+        obj.append(uniqueId,data);
+        String s = JSONUtil.toJsonStr(obj, 2);
         FileUtil.writeBytes(s.getBytes(), tablePath);
+        LogUtilILZF.log("记录行数据添加[" + tableName + "]");
         return true;
     }
 
@@ -144,6 +134,6 @@ public class DataUtilILZF {
 
 
     public static void main(String[] args) {
-        saveData(new FileInfoEntity(new File("D:\\project\\usefulService\\files\\efulService.zip")));
+        saveData(new FileInfoEntity(new File("D:\\project\\usefulService\\files\\ufulService.zip")));
     }
 }

@@ -1,6 +1,7 @@
 package com.ilzf.onlineShare.controller;
 
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import com.ilzf.base.entity.ResultEntity;
 import com.ilzf.onlineShare.entity.OnlineShareEntity;
 import com.ilzf.utils.DataUtilILZF;
@@ -22,7 +23,7 @@ public class OnlineShareController {
     }
     @RequestMapping("/loadData")
     public ResultEntity<?> loadData(){
-        JSONArray savedData = DataUtilILZF.getSavedData(OnlineShareEntity.class);
+        JSONObject savedData = DataUtilILZF.getSavedData(OnlineShareEntity.class);
         return ResultEntity.success(savedData);
     }
 }

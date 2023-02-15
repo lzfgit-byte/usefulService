@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -52,10 +53,11 @@ public class FileShareService {
     }
 
     public void downloadFile(String IdOrName, HttpServletResponse response) {
-        JSONArray savedData = DataUtilILZF.getSavedData(FileInfoEntity.class);
+        JSONObject savedData = DataUtilILZF.getSavedData(FileInfoEntity.class);
+        Set<String> keyS = savedData.keySet();
         AtomicReference<JSONObject> obj = new AtomicReference<>();
-        savedData.forEach(item -> {
-            JSONObject forObj = (JSONObject) item;
+        keyS.forEach(key -> {
+            JSONObject forObj =(JSONObject) savedData.get(key);
             String id = StringUtilIZLF.wrapperString(forObj.get("id"));
             String name = StringUtilIZLF.wrapperString(forObj.get("name"));
             if(id.equals(IdOrName) || name.equals(IdOrName)){
