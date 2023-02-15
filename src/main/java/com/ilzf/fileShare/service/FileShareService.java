@@ -8,6 +8,7 @@ import com.ilzf.base.entity.ResultEntity;
 import com.ilzf.fileShare.entity.FileInfoEntity;
 import com.ilzf.utils.DataUtilILZF;
 import com.ilzf.utils.FileUtilILZF;
+import com.ilzf.utils.LogUtilILZF;
 import com.ilzf.utils.StringUtilIZLF;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class FileShareService {
-    public ResultEntity<?> uploadFile( MultipartFile file) {
+    public ResultEntity<?> uploadFile(MultipartFile file) {
         if (file == null) {
             return ResultEntity.error();
         }
@@ -57,19 +58,24 @@ public class FileShareService {
         Set<String> keyS = savedData.keySet();
         AtomicReference<JSONObject> obj = new AtomicReference<>();
         keyS.forEach(key -> {
-            JSONObject forObj =(JSONObject) savedData.get(key);
+            JSONObject forObj = (JSONObject) savedData.get(key);
             String id = StringUtilIZLF.wrapperString(forObj.get("id"));
             String name = StringUtilIZLF.wrapperString(forObj.get("name"));
-            if(id.equals(IdOrName) || name.equals(IdOrName)){
+            if (id.equals(IdOrName) || name.equals(IdOrName)) {
                 obj.set(forObj);
             }
         });
         JSONObject entries = obj.get();
         String path = StringUtilIZLF.wrapperString(entries.get("path"));
         String name = StringUtilIZLF.wrapperString(entries.get("name"));
-        FileUtilILZF.downloadFileToClient(name,new File(path),response);
+        if (StringUtilIZLF.isBlankOrEmpty(path)) {
+            LogUtilILZF.log("文件丢失", "[", name, "]");
+            return;
+        }
+        FileUtilILZF.downloadFileToClient(name, new File(path), response);
     }
-    public void downloadFilebyPath( String path, HttpServletResponse response) {
+
+    public void downloadFilebyPath(String path, HttpServletResponse response) {
         FileReader fileReader = FileReader.create(new File(path));
         try {
             fileReader.writeToStream(response.getOutputStream());
@@ -81,7 +87,7 @@ public class FileShareService {
     public ResultEntity<List<FileInfoEntity>> listFiles() {
         List<FileInfoEntity> res = new ArrayList<>();
         String uploadFilePath = FileUtilILZF.getUploadFilePath();
-        FileUtil.walkFiles(new File(uploadFilePath),file -> {
+        FileUtil.walkFiles(new File(uploadFilePath), file -> {
             res.add(new FileInfoEntity(file));
         });
         return ResultEntity.success(res);

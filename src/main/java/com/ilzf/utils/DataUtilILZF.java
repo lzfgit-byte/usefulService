@@ -85,6 +85,10 @@ public class DataUtilILZF {
         String value = tableValue.value();
         String tablePath = FileUtilILZF.getSaveDataPath() + value + DB_SUFFIX;
         File file = new File(tablePath);
+        if (!file.exists()) {
+            LogUtilILZF.log("[" + value + "]未创建");
+            return null;
+        }
         String dataStr = FileUtil.readString(file, StandardCharsets.UTF_8);
         return JSONUtil.parseObj(dataStr);
     }
@@ -121,7 +125,7 @@ public class DataUtilILZF {
             dataStr = "{}";
         }
         JSONObject obj = JSONUtil.parseObj(dataStr);
-        obj.append(uniqueId, data);
+        obj.putOpt(uniqueId, data);
         String s = JSONUtil.toJsonStr(obj, 2);
         FileUtil.writeBytes(s.getBytes(), tablePath);
         LogUtilILZF.log("记录行数据添加[" + tableName + "]");
