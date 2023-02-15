@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class DataUtilILZF {
     public static final String DB_SUFFIX = ".data";
+
     /**
      * 获取类数据的map结构
      *
@@ -47,6 +48,7 @@ public class DataUtilILZF {
                     String s = invoke.toString();
                     tempData.put(name, s);
                 } catch (Exception e) {
+                    LogUtilILZF.log("数据解析失败" + e.getMessage());
                     e.printStackTrace();
                 }
             } else if (Long.class == type) {
@@ -54,10 +56,10 @@ public class DataUtilILZF {
                     Method getMethod = aClass.getMethod("get" + StringUtilIZLF.upFirstCharCode(name));
                     Object invoke = getMethod.invoke(entity);
                     assert invoke != null;
-
-                    tempData.put(name, (Long) invoke);
+                    tempData.put(name, invoke);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    LogUtilILZF.log("数据解析失败" + e.getMessage());
                 }
             }
 
@@ -98,6 +100,7 @@ public class DataUtilILZF {
         String uniqueField = getUniqueFieldList(cla);
         String uniqueId = StringUtilIZLF.wrapperString(data.get(uniqueField));
         if (StringUtilIZLF.isBlankOrEmpty(uniqueId)) {
+            LogUtilILZF.log("空唯一值");
             return false;
         }
         String tablePath = FileUtilILZF.getSaveDataPath() + tableName + DB_SUFFIX;
@@ -106,6 +109,7 @@ public class DataUtilILZF {
             try {
                 boolean newFile = file.createNewFile();
                 if (!newFile) {
+                    LogUtilILZF.log("文件创建失败");
                     return false;
                 }
             } catch (IOException e) {
@@ -117,7 +121,7 @@ public class DataUtilILZF {
             dataStr = "{}";
         }
         JSONObject obj = JSONUtil.parseObj(dataStr);
-        obj.append(uniqueId,data);
+        obj.append(uniqueId, data);
         String s = JSONUtil.toJsonStr(obj, 2);
         FileUtil.writeBytes(s.getBytes(), tablePath);
         LogUtilILZF.log("记录行数据添加[" + tableName + "]");

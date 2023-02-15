@@ -9,6 +9,11 @@ import lombok.Data;
 @Table("onlineShare")
 @AllArgsConstructor
 public class OnlineShareEntity {
+
     @Unique
+    String pk = "a";
     String text;
+    public OnlineShareEntity (String text){
+        this.text = text;
+    }
 }
