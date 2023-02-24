@@ -95,12 +95,10 @@ public class FileShareService {
         List<FileInfoEntity> finalRes = res;
 
         FileUtilILZF.walkFiles(new File(path), file -> {
-            if (!file.isHidden()) {
-                if (file.isDirectory()) {
-                    finalRes.add(new FileInfoEntity(file.getAbsolutePath(), file.getName()));
-                } else {
-                    finalRes.add(new FileInfoEntity(file));
-                }
+            if (file.isDirectory()) {
+                finalRes.add(new FileInfoEntity(file.getAbsolutePath(), file.getName(), file.isHidden()));
+            } else {
+                finalRes.add(new FileInfoEntity(file));
             }
         });
         return ResultEntity.success(res);

@@ -31,11 +31,13 @@ public class FileInfoEntity {
             }
 
         }
+        this.setHidden(file.isHidden());
     }
 
-    public FileInfoEntity(String path,String name) {
+    public FileInfoEntity(String path,String name,boolean isHidden) {
         this.path = path;
         this.name = name;
+        this.setHidden(isHidden);
     }
 
     public FileInfoEntity(MultipartFile file, String path) {
@@ -57,4 +59,6 @@ public class FileInfoEntity {
     private Long size;
     //文件类型
     private String fileType;
+    //是否隐藏
+    private boolean hidden;
 }

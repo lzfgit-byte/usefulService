@@ -183,12 +183,13 @@ public class FileUtilILZF {
 //                free = Double.valueOf(String.valueOf(free).substring(0, String.valueOf(free).indexOf(".") + 2));
 //                Double compare = (Double) (1 - free * 1.0 / total) * 100;
 //                String str = c + ":盘  总量:" + total + "G 剩余  " + free + "G 已使用 " + compare.intValue() + "%";
-                list.add(new FileInfoEntity(dirName.toUpperCase(),dirName.toUpperCase()));
+                list.add(new FileInfoEntity(dirName.toUpperCase(), dirName.toUpperCase(), false));
             }
         }
         return list;
     }
-    public static void walkFiles(File file, Consumer<File> consumer){
+
+    public static void walkFiles(File file, Consumer<File> consumer) {
         if (file.isDirectory()) {
             File[] subFiles = file.listFiles();
             if (ArrayUtil.isNotEmpty(subFiles)) {
