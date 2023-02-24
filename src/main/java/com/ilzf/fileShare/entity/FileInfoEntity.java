@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import com.ilzf.base.annotation.Table;
 import com.ilzf.base.annotation.Unique;
+import com.ilzf.utils.FileUtilILZF;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,8 +21,15 @@ public class FileInfoEntity {
         this.setName(file.getName());
         this.setPath(absPath);
         this.setSize(file.length());
-        if(!file.isDirectory() && absPath.lastIndexOf(".") > -1){
-            this.setFileType(absPath.substring(absPath.lastIndexOf(".")));
+        if(!file.isDirectory()){
+            int a = absPath.lastIndexOf(".");
+            int b = absPath.lastIndexOf(FileUtilILZF.SEPARATOR);
+            if(a > b){
+                this.setFileType(absPath.substring(absPath.lastIndexOf(".")));
+            }else {
+                this.setFileType("文件");
+            }
+
         }
     }
 
