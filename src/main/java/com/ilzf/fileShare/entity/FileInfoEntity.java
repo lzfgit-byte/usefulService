@@ -15,15 +15,29 @@ import java.io.File;
 @Data
 @Table("file")
 public class FileInfoEntity {
-    public FileInfoEntity(File file){
+    public FileInfoEntity(File file) {
+        String absPath = file.getAbsolutePath();
         this.setName(file.getName());
-        this.setPath(file.getAbsolutePath());
+        this.setPath(absPath);
         this.setSize(file.length());
+        if(!file.isDirectory() && absPath.lastIndexOf(".") > -1){
+            this.setFileType(absPath.substring(absPath.lastIndexOf(".")));
+        }
     }
-    public FileInfoEntity(MultipartFile file,String path){
+
+    public FileInfoEntity(String path,String name) {
+        this.path = path;
+        this.name = name;
+    }
+
+    public FileInfoEntity(MultipartFile file, String path) {
         this.setName(file.getOriginalFilename());
         this.setPath(path);
         this.setSize(file.getSize());
+        if(path.lastIndexOf(".") > -1){
+            this.setFileType(path.substring(path.lastIndexOf(".")));
+        }
+
     }
 
     //文件名字
@@ -33,4 +47,6 @@ public class FileInfoEntity {
     private String path;
     //文件大小
     private Long size;
+    //文件类型
+    private String fileType;
 }

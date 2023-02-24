@@ -2,6 +2,7 @@ package com.ilzf.fileShare.service;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.ilzf.base.entity.ResultEntity;
@@ -20,10 +21,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 @Service
 public class FileShareService {
@@ -76,20 +76,34 @@ public class FileShareService {
     }
 
     public void downloadFilebyPath(String path, HttpServletResponse response) {
-        FileReader fileReader = FileReader.create(new File(path));
-        try {
-            fileReader.writeToStream(response.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
+        File file = new File(path);
+        if (!file.exists()) {
+            LogUtilILZF.log("文件丢失", "[", file.getName(), "]");
+            return;
         }
+        FileUtilILZF.downloadFileToClient(file.getName(), file, response);
     }
 
-    public ResultEntity<List<FileInfoEntity>> listFiles() {
+    public ResultEntity<List<FileInfoEntity>> listFiles(Map<String, String> map) {
         List<FileInfoEntity> res = new ArrayList<>();
-        String uploadFilePath = FileUtilILZF.getUploadFilePath();
-        FileUtil.walkFiles(new File(uploadFilePath), file -> {
-            res.add(new FileInfoEntity(file));
+        String path = map.get("path");
+        if (StringUtilIZLF.isBlankOrEmpty(path)) {
+            res = FileUtilILZF.getDisk();
+            return ResultEntity.success(res);
+        }
+
+        List<FileInfoEntity> finalRes = res;
+
+        FileUtilILZF.walkFiles(new File(path), file -> {
+            if (!file.isHidden()) {
+                if (file.isDirectory()) {
+                    finalRes.add(new FileInfoEntity(file.getAbsolutePath(), file.getName()));
+                } else {
+                    finalRes.add(new FileInfoEntity(file));
+                }
+            }
         });
         return ResultEntity.success(res);
     }
+
 }

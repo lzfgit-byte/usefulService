@@ -11,6 +11,7 @@ import com.ilzf.utils.DataUtilILZF;
 import com.ilzf.utils.FileUtilILZF;
 import com.ilzf.utils.StringUtilIZLF;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
@@ -53,8 +55,8 @@ public class FileInfoController {
      * @param path
      * @param response
      */
-    @RequestMapping("/downloadFilebyPath")
-    public void downloadFilebyPath(@RequestParam(value = "path") String path, HttpServletResponse response) {
+    @RequestMapping("/downloadFileByPath")
+    public void downloadFileByPath(@RequestParam(value = "path") String path, HttpServletResponse response) {
         fileShareService.downloadFilebyPath(path,response);
     }
 
@@ -63,7 +65,7 @@ public class FileInfoController {
      * @return
      */
     @RequestMapping("/listFiles")
-    public ResultEntity<List<FileInfoEntity>> listFiles() {
-       return fileShareService.listFiles();
+    public ResultEntity<List<FileInfoEntity>> listFiles(@RequestBody Map<String,String> map) {
+       return fileShareService.listFiles(map);
     }
 }
