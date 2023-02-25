@@ -8,16 +8,18 @@ import lombok.SneakyThrows;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Set;
 
 public class ConfigUtilILZF {
 
     public final static String TRUTH_VALUE = "1";
-    public final static String FALSITY_VALUE = "1";
+    public final static String FALSITY_VALUE = "0";
+    public final static String CONFIG_PATH = FileUtilILZF.getConfigPath();
 
     @SneakyThrows
-    public static void set(String key, String value) {
-        String configPath = FileUtilILZF.getConfigPath();
-        File file = new File(configPath);
+    public static JSONObject loadConfig(){
+        File file = new File(CONFIG_PATH);
         if (!file.exists()) {
             boolean newFile = file.createNewFile();
             if(!newFile){
@@ -28,25 +30,30 @@ public class ConfigUtilILZF {
         if (StringUtilIZLF.isBlankOrEmpty(jsonStr)) {
             jsonStr = "{}";
         }
-        JSONObject jsonObj = JSONUtil.parseObj(jsonStr);
+        return JSONUtil.parseObj(jsonStr);
+    }
+
+    public static void set(String key, String value) {
+        JSONObject jsonObj = loadConfig();
         jsonObj.set(key, value);
-        FileUtil.writeString(jsonObj.toJSONString(2), file, StandardCharsets.UTF_8);
+        FileUtil.writeString(jsonObj.toJSONString(2), new File(CONFIG_PATH), StandardCharsets.UTF_8);
+    }
+    public static void setMap(Map<String,String> map) {
+        JSONObject jsonObj = loadConfig();
+        Set<String> keySet = map.keySet();
+        keySet.forEach(key ->{
+            jsonObj.set(key,map.get(key));
+        });
+        FileUtil.writeString(jsonObj.toJSONString(2), new File(CONFIG_PATH), StandardCharsets.UTF_8);
     }
 
     public static String get(String key) {
-        String configPath = FileUtilILZF.getConfigPath();
-        File file = new File(configPath);
-        if (!file.exists()) {
-            LogUtilILZF.log("没有配置文件");
-            return null;
-        }
-        String jsonStr = FileUtil.readString(file, StandardCharsets.UTF_8);
-        if(StringUtilIZLF.isBlankOrEmpty(jsonStr)){
-            LogUtilILZF.log("配置文件为空");
-            return null;
-        }
-        JSONObject object = JSONUtil.parseObj(jsonStr);
-        return StringUtilIZLF.wrapperString(object.get(key));
+        JSONObject jsonObj = loadConfig();
+        return StringUtilIZLF.wrapperString(jsonObj.get(key));
+    }
+
+    public static JSONObject listConfig(){
+        return loadConfig();
     }
 
     public static boolean getBoolean(Object o){
