@@ -26,18 +26,27 @@ public class FileInfoEntity {
             int b = absPath.lastIndexOf(FileUtilILZF.SEPARATOR);
             if(a > b){
                 this.setFileType(absPath.substring(absPath.lastIndexOf(".")));
+                this.setOrder(2);
             }else {
                 this.setFileType("文件");
+                this.setOrder(1);
             }
 
         }
         this.setHidden(file.isHidden());
+        if(file.isHidden()) this.setOrder(3);
     }
 
     public FileInfoEntity(String path,String name,boolean isHidden) {
         this.path = path;
         this.name = name;
         this.setHidden(isHidden);
+        if(isHidden){
+            this.setOrder(3);
+        }else {
+            this.setOrder(1);
+        }
+
     }
 
     public FileInfoEntity(MultipartFile file, String path) {
@@ -46,6 +55,7 @@ public class FileInfoEntity {
         this.setSize(file.getSize());
         if(path.lastIndexOf(".") > -1){
             this.setFileType(path.substring(path.lastIndexOf(".")));
+            this.setOrder(2);
         }
 
     }
@@ -61,4 +71,6 @@ public class FileInfoEntity {
     private String fileType;
     //是否隐藏
     private boolean hidden;
+    //文件类型
+    private Integer order;
 }
