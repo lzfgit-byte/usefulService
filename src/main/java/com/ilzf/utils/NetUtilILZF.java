@@ -36,38 +36,42 @@ public class NetUtilILZF {
     }
 
 
-    @SneakyThrows
     public static String getHtmlByUrl(String urlStr) {
         //建立连接
-        URL url = new URL(urlStr);
-        HttpURLConnection httpUrlConn = null;
-        if (ConfigUtilILZF.ConfigDefault.NEED_PROXY) {
-            Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(ConfigUtilILZF.ConfigDefault.PROXY_IP, ConfigUtilILZF.ConfigDefault.PROXY_PORT));
-            httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
-        }else {
-            httpUrlConn = (HttpURLConnection) url.openConnection();
-        }
-        httpUrlConn.setDoInput(true);
-        httpUrlConn.setRequestMethod("GET");
-        httpUrlConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-        //获取输入流
-        InputStream input = httpUrlConn.getInputStream();
-        //将字节输入流转换为字符输入流
-        InputStreamReader read = new InputStreamReader(input, StandardCharsets.UTF_8);
-        //为字符输入流添加缓冲
-        BufferedReader br = new BufferedReader(read);
-        // 读取返回结果
-        String data = br.readLine();
         StringBuffer sb = new StringBuffer();
-        while (data != null) {
-            sb.append(data);
-            data = br.readLine();
+        try {
+            URL url = new URL(urlStr);
+            HttpURLConnection httpUrlConn = null;
+            if (ConfigUtilILZF.ConfigDefault.NEED_PROXY) {
+                Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(ConfigUtilILZF.ConfigDefault.PROXY_IP, ConfigUtilILZF.ConfigDefault.PROXY_PORT));
+                httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
+            }else {
+                httpUrlConn = (HttpURLConnection) url.openConnection();
+            }
+            httpUrlConn.setDoInput(true);
+            httpUrlConn.setRequestMethod("GET");
+            httpUrlConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+            //获取输入流
+            InputStream input = httpUrlConn.getInputStream();
+            //将字节输入流转换为字符输入流
+            InputStreamReader read = new InputStreamReader(input, StandardCharsets.UTF_8);
+            //为字符输入流添加缓冲
+            BufferedReader br = new BufferedReader(read);
+            // 读取返回结果
+            String data = br.readLine();
+            while (data != null) {
+                sb.append(data);
+                data = br.readLine();
+            }
+            // 释放资源
+            br.close();
+            read.close();
+            input.close();
+            httpUrlConn.disconnect();
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        // 释放资源
-        br.close();
-        read.close();
-        input.close();
-        httpUrlConn.disconnect();
+
         return sb.toString();
     }
 
