@@ -13,8 +13,8 @@ import java.util.Set;
 
 public class ConfigUtilILZF {
 
-    public final static String TRUTH_VALUE = "1";
-    public final static String FALSITY_VALUE = "0";
+    public final static String TRUTH_VALUE = "true";
+    public final static String FALSITY_VALUE = "false";
     public final static String CONFIG_PATH = FileUtilILZF.getConfigPath();
 
     @SneakyThrows
