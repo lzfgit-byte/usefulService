@@ -10,6 +10,10 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 public class ConfigUtilILZF {
+
+    public final static String TRUTH_VALUE = "1";
+    public final static String FALSITY_VALUE = "1";
+
     @SneakyThrows
     public static void set(String key, String value) {
         String configPath = FileUtilILZF.getConfigPath();
@@ -43,5 +47,22 @@ public class ConfigUtilILZF {
         }
         JSONObject object = JSONUtil.parseObj(jsonStr);
         return StringUtilIZLF.wrapperString(object.get(key));
+    }
+
+    public static boolean getBoolean(Object o){
+        if(StringUtilIZLF.isBlankOrEmpty(o)){
+            return false;
+        }
+        return TRUTH_VALUE.equals(StringUtilIZLF.wrapperString(o));
+    }
+
+    /**
+     * 默认为false
+     * @param key
+     * @return
+     */
+    public static boolean getBooleanByKey(String key){
+        String s = get(key);
+        return getBoolean(s);
     }
 }

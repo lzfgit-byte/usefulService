@@ -7,10 +7,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.ilzf.base.entity.ResultEntity;
 import com.ilzf.fileShare.entity.FileInfoEntity;
-import com.ilzf.utils.DataUtilILZF;
-import com.ilzf.utils.FileUtilILZF;
-import com.ilzf.utils.LogUtilILZF;
-import com.ilzf.utils.StringUtilIZLF;
+import com.ilzf.utils.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -95,10 +92,20 @@ public class FileShareService {
         List<FileInfoEntity> finalRes = res;
 
         FileUtilILZF.walkFiles(new File(path), file -> {
-            if (file.isDirectory()) {
-                finalRes.add(new FileInfoEntity(file.getAbsolutePath(), file.getName(), file.isHidden()));
+            if (ConfigUtilILZF.getBooleanByKey("isShowHidden")) {
+                if (file.isDirectory()) {
+                    finalRes.add(new FileInfoEntity(file.getAbsolutePath(), file.getName(), file.isHidden()));
+                } else {
+                    finalRes.add(new FileInfoEntity(file));
+                }
             } else {
-                finalRes.add(new FileInfoEntity(file));
+                if (!file.isHidden()) {
+                    if (file.isDirectory()) {
+                        finalRes.add(new FileInfoEntity(file.getAbsolutePath(), file.getName(), file.isHidden()));
+                    } else {
+                        finalRes.add(new FileInfoEntity(file));
+                    }
+                }
             }
         });
         return ResultEntity.success(res);
