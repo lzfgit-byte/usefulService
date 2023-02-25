@@ -35,7 +35,7 @@
 
 
     <!-- 按照每天及大小生成日志文件 -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILEINFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}-%i.log</FileNamePattern>
@@ -54,12 +54,12 @@
             2. 把 <filter> 注释去掉改一下 level 就可以了
         -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>info</level>
+            <level>INFO</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILEERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}-%i.error</FileNamePattern>
@@ -78,31 +78,7 @@
             2. 把 <filter> 注释去掉改一下 level 就可以了
         -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>error</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-    </appender>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!--日志文件输出的文件名-->
-            <FileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}-%i.dug</FileNamePattern>
-            <!--日志文件最大大小-->
-            <maxFileSize>100MB</maxFileSize>
-            <!--日志文件保留天数-->
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>${FILE_LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-        <!-- 过滤级别,
-            如果想分类生成日志文件的话(分成debug、info、error等三个日志文件, 每个文件只记录自己级别的日志),
-            1. 直接把这个 <appender> 复制三分改一下 FileNamePattern 和 name.
-            2. 把 <filter> 注释去掉改一下 level 就可以了
-        -->
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>debug</level>
+            <level>ERROR</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
@@ -116,29 +92,35 @@
     <springProfile name="dev,prod">
         <logger name="org.springframework" level="INFO" additivity="false">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="FILEERROR" />
+            <appender-ref ref="FILEINFO" />
         </logger>
         <logger name="com.netflix" level="INFO" additivity="false">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="FILEERROR" />
+            <appender-ref ref="FILEINFO" />
         </logger>
         <logger name="com.pro.test" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="FILEERROR" />
+            <appender-ref ref="FILEINFO" />
         </logger>
         <logger name="java.sql" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="FILEERROR" />
+            <appender-ref ref="FILEINFO" />
         </logger>
         <!--项目包的路径-->
         <logger name="com.pro" level="DEBUG,INFO" additivity="false">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="FILEERROR" />
+            <appender-ref ref="FILEINFO" />
         </logger>
     </springProfile>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="FILEERROR" />
+        <appender-ref ref="FILEINFO" />
     </root>
 </configuration>
