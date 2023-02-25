@@ -69,7 +69,42 @@ public class ConfigUtilILZF {
      * @return
      */
     public static boolean getBooleanByKey(String key){
+        String value = get(key);
+        return getBoolean(value);
+    }
+    /**
+     * 默认为true
+     * @param key
+     * @return
+     */
+    public static boolean getTrueIfNull(String key){
         String s = get(key);
-        return getBoolean(s);
+        return !getBoolean(s);
+    }
+
+    public static <T> T getDefaultIfValueNull(String key,T value){
+        String s = get(key);
+        if(StringUtilIZLF.isNotBlankOrEmpty(s)){
+            Class<?> aClass = value.getClass();
+            if(aClass == String.class){
+                return (T) s;
+            }else if(aClass == Integer.class){
+                return (T)Integer.valueOf(s);
+            }
+            return (T) s;
+        }
+        return value;
+    }
+
+    public static void main(String[] args) {
+        set("text","21313");
+        Integer text = getDefaultIfValueNull("text", 132);
+        System.out.println(text);
+    }
+    static class ConfigDefault {
+        public static final int PROXY_PORT = 10801;
+        public static final String PROXY_IP = "127.0.0.1";
+        public static final boolean NEED_PROXY = getTrueIfNull("needProxy");
+
     }
 }

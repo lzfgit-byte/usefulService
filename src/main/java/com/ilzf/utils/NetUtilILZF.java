@@ -1,7 +1,6 @@
 package com.ilzf.utils;
 
 import cn.hutool.setting.dialect.Props;
-import com.ilzf.base.constData.ConfigDefault;
 import lombok.SneakyThrows;
 
 import java.io.BufferedReader;
@@ -16,12 +15,7 @@ public class NetUtilILZF {
     public static final String PORT = StringUtilIZLF.wrapperString(new Props("application.yml").get("port"));
     public static final String HTTP = "http://";
     public static final String SEPARATOR = ":";
-    static {
-        Properties prop = System.getProperties();
-        prop.put("proxySet", true);
-        prop.setProperty("socksProxyHost", ConfigDefault.PROXY_IP);
-        prop.setProperty("socksProxyPort", ConfigDefault.PROXY_PORT+"");
-    }
+
     @SneakyThrows
     public static List<String> getLocalhost() {
         List<String> result = new ArrayList<>();
@@ -46,7 +40,13 @@ public class NetUtilILZF {
     public static String getHtmlByUrl(String urlStr) {
         //建立连接
         URL url = new URL(urlStr);
-        HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();
+        HttpURLConnection httpUrlConn = null;
+        if (ConfigUtilILZF.ConfigDefault.NEED_PROXY) {
+            Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(ConfigUtilILZF.ConfigDefault.PROXY_IP, ConfigUtilILZF.ConfigDefault.PROXY_PORT));
+            httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
+        }else {
+            httpUrlConn = (HttpURLConnection) url.openConnection();
+        }
         httpUrlConn.setDoInput(true);
         httpUrlConn.setRequestMethod("GET");
         httpUrlConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
