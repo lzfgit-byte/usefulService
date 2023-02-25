@@ -22,7 +22,9 @@ public class TempController {
         List<Boolean> allDelete = new ArrayList<>();
 
         FileUtilILZF.walkFiles(file, file1 -> {
-            allDelete.add(file1.delete());
+            boolean delete = file1.delete();
+            allDelete.add(delete);
+            if (!delete)LogUtilILZF.log("文件【",file1.getName(),"】","删除失败");
         });
         AtomicInteger thy = new AtomicInteger();
         AtomicInteger fty = new AtomicInteger();
