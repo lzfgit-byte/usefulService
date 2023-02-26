@@ -19,20 +19,7 @@ public class HWordController {
     @Autowired
     HentaiWordParseService service;
 
-    @RequestMapping("/getMainHtml")
-    public ResultEntity<?> getMainHtml() {
-        String htmlByUrl = NetUtilILZF.getHtmlByUrl(HentaiWordParseService.MAIN_URL);
-        System.out.println(htmlByUrl);
-        if (StringUtilIZLF.isBlankOrEmpty(htmlByUrl)) {
-            return ResultEntity.error("网络错误");
-        }
-        ResultEntity<?> mainHtml = new HentaiWordParseService().getMainHtml(htmlByUrl);
-        ResultEntity<?> pageInfo = new HentaiWordParseService().getPageInfo(htmlByUrl);
-        JSONObject json = new JSONObject();
-        json.putOnce("mainHtml", mainHtml);
-        json.putOnce("pageInfo", pageInfo);
-        return ResultEntity.success(json);
-    }
+
 
     @RequestMapping("/getImgByte")
     public void getImgByte(@RequestParam("path") String path, HttpServletResponse response) {

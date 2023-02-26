@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class MainPageCardInfoEntity {
+public class MainHtmlEntity {
     //类型
     private String type;
     private String coverUrl;
