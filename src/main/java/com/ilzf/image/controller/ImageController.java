@@ -41,4 +41,16 @@ public class ImageController {
 
         return ResultEntity.success(res);
     }
+
+    @RequestMapping("/listNetWOrkInfo")
+    public ResultEntity<List<ImageInfoEntity>> listNetWOrkInfo() {
+        List<ImageInfoEntity> res = new ArrayList<>();
+        List<String> localhost = NetUtilILZF.getLocalhost();
+
+        localhost.forEach(str -> {
+            res.add(new ImageInfoEntity(str));
+        });
+
+        return ResultEntity.success(res);
+    }
 }
