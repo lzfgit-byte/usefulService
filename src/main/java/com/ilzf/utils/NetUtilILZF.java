@@ -91,7 +91,14 @@ public class NetUtilILZF {
             //获取输入流
             InputStream input = httpUrlConn.getInputStream();
 
-            response.setHeader("content-type", "image/" + imageType);
+            Map<String, List<String>> headerFields = httpUrlConn.getHeaderFields();
+            Set<String> keySet = headerFields.keySet();
+            keySet.forEach(key -> {
+                List<String> values = headerFields.get(key);
+                if (values.size() == 1) {
+                    response.setHeader(key, values.get(0));
+                }
+            });
 
             byte[] a = new byte[1000];
             int count = 0;
@@ -113,8 +120,15 @@ public class NetUtilILZF {
             HttpURLConnection httpUrlConn = getHttpURLConnection(url);
             //获取输入流
             InputStream input = httpUrlConn.getInputStream();
+            Map<String, List<String>> headerFields = httpUrlConn.getHeaderFields();
+            Set<String> keySet = headerFields.keySet();
+            keySet.forEach(key -> {
+                List<String> values = headerFields.get(key);
+                if (values.size() == 1) {
+                    response.setHeader(key, values.get(0));
+                }
+            });
 
-            response.setHeader("content-type", "video/" + VideoType);
 
             byte[] a = new byte[1000];
             int count = 0;
