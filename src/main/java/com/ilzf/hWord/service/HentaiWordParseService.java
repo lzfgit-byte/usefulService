@@ -41,7 +41,7 @@ public class HentaiWordParseService {
                 height = element.attr("height");
                 title = element.attr("alt");
             }
-            jumpUrl = helpGetElementAttr(thumb.selectFirst("a"), "src");
+            jumpUrl = helpGetElementAttr(thumb.selectFirst("a"), "href");
             type = helpGetElementText(thumb.selectFirst("h4"));
             count = helpGetElementText(thumb.selectFirst("span"));
             MainHtmlEntity foo = new MainHtmlEntity(type, coverUrl, jumpUrl, width, height, count, title);
