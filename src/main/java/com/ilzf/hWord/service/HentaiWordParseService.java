@@ -19,7 +19,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class HentaiWordParseService {
-    private static final String MAIN_URL = "https://thehentaiworld.com/?new";
+    public static final String MAIN_URL = "https://thehentaiworld.com/?new";
 
     public String helpGetElementAttr(Element e, String attr) {
         return e != null ? e.attr(attr) : "";

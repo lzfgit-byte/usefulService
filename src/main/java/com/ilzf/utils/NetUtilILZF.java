@@ -1,11 +1,15 @@
 package com.ilzf.utils;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.setting.dialect.Props;
 import lombok.SneakyThrows;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -35,22 +39,26 @@ public class NetUtilILZF {
         return result.stream().map(item -> HTTP + item + SEPARATOR + PORT).collect(Collectors.toList());
     }
 
+    private static HttpURLConnection getHttpURLConnection(String urlStr) throws Exception {
+        URL url = new URL(urlStr);
+        HttpURLConnection httpUrlConn = null;
+        if (ConfigUtilILZF.ConfigDefault.NEED_PROXY) {
+            Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(ConfigUtilILZF.ConfigDefault.PROXY_IP, ConfigUtilILZF.ConfigDefault.PROXY_PORT));
+            httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
+        } else {
+            httpUrlConn = (HttpURLConnection) url.openConnection();
+        }
+        httpUrlConn.setDoInput(true);
+        httpUrlConn.setRequestMethod("GET");
+        httpUrlConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+        return httpUrlConn;
+    }
 
     public static String getHtmlByUrl(String urlStr) {
         //建立连接
         StringBuffer sb = new StringBuffer();
         try {
-            URL url = new URL(urlStr);
-            HttpURLConnection httpUrlConn = null;
-            if (ConfigUtilILZF.ConfigDefault.NEED_PROXY) {
-                Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(ConfigUtilILZF.ConfigDefault.PROXY_IP, ConfigUtilILZF.ConfigDefault.PROXY_PORT));
-                httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
-            }else {
-                httpUrlConn = (HttpURLConnection) url.openConnection();
-            }
-            httpUrlConn.setDoInput(true);
-            httpUrlConn.setRequestMethod("GET");
-            httpUrlConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+            HttpURLConnection httpUrlConn = getHttpURLConnection(urlStr);
             //获取输入流
             InputStream input = httpUrlConn.getInputStream();
             //将字节输入流转换为字符输入流
@@ -68,11 +76,57 @@ public class NetUtilILZF {
             read.close();
             input.close();
             httpUrlConn.disconnect();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return sb.toString();
+    }
+
+    public static void getImgByte(String imgUrl, HttpServletResponse response) {
+        String[] split = imgUrl.split("\\.");
+        String imageType = split[split.length - 1];
+        try (OutputStream output = response.getOutputStream()) {
+            HttpURLConnection httpUrlConn = getHttpURLConnection(imgUrl);
+            //获取输入流
+            InputStream input = httpUrlConn.getInputStream();
+
+            response.setHeader("content-type", "image/" + imageType);
+
+            byte[] a = new byte[1000];
+            int count = 0;
+            while ((count = input.read(a)) > -1) {
+                output.write(a, 0, count);
+            }
+            input.close();
+            httpUrlConn.disconnect();
+            output.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void getVideoByte(String url, HttpServletResponse response) {
+        String[] split = url.split("\\.");
+        String VideoType = split[split.length - 1];
+        try (OutputStream output = response.getOutputStream()) {
+            HttpURLConnection httpUrlConn = getHttpURLConnection(url);
+            //获取输入流
+            InputStream input = httpUrlConn.getInputStream();
+
+            response.setHeader("content-type", "video/" + VideoType);
+
+            byte[] a = new byte[1000];
+            int count = 0;
+            while ((count = input.read(a)) > -1) {
+                output.write(a, 0, count);
+            }
+            input.close();
+            httpUrlConn.disconnect();
+            output.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
