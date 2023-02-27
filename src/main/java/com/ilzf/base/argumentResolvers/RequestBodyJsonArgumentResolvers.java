@@ -3,6 +3,7 @@ package com.ilzf.base.argumentResolvers;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.ilzf.base.annotation.RequestBodyJson;
+import com.ilzf.utils.StringUtilIZLF;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -26,25 +27,18 @@ public class RequestBodyJsonArgumentResolvers implements HandlerMethodArgumentRe
         Class<?> parameterType = parameter.getParameterType();
         RequestBodyJson parameterAnnotation = parameter.getParameterAnnotation(RequestBodyJson.class);
         String value = parameterAnnotation.value();
-        byte[] bytes = new byte[1000];
-        int count = 0;
-
-        byte[] data;
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream();
-             ServletInputStream inputStream = Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class)).getInputStream();) {
-            while ((count = inputStream.read(bytes)) > -1){
-                output.write(bytes,0,count);
-            }
-            data = output.toByteArray();
-        }
-        String str = new String(data, StandardCharsets.UTF_8);
+        String str = StringUtilIZLF.readStrFormStream(Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class)).getInputStream());
         JSONObject jsonObject = JSONUtil.parseObj(str);
+        String value_ = StringUtilIZLF.wrapperString(jsonObject.get(value));
+        if(StringUtilIZLF.isBlankOrEmpty(value_)){
+            throw new Exception("RequestBodyJson 参数解析失败" + str);
+        }
         if(String.class == parameterType){
-            return  String.valueOf(jsonObject.get(value).toString());
+            return  value_;
         }else if (Integer.class == parameterType){
             return Integer.valueOf(jsonObject.get(value).toString());
         }else {
-            throw new Exception("RequestBodyJson 参数解析失败");
+            throw new Exception("RequestBodyJson 参数解析失败" + str);
         }
     }
 }

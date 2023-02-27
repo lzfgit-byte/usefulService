@@ -1,17 +1,18 @@
 package com.ilzf.utils;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.crypto.digest.MD5;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.dialect.Props;
 import lombok.SneakyThrows;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,61 +84,55 @@ public class NetUtilILZF {
         return sb.toString();
     }
 
-    public static void getImgByte(String imgUrl, HttpServletResponse response) {
-        String[] split = imgUrl.split("\\.");
-        String imageType = split[split.length - 1];
-        try (OutputStream output = response.getOutputStream()) {
-            HttpURLConnection httpUrlConn = getHttpURLConnection(imgUrl);
-            //获取输入流
-            InputStream input = httpUrlConn.getInputStream();
+    public static void getByteFromNet(String url, HttpServletResponse response) {
+        MD5 md5 = MD5.create();
+        String tempName = md5.digestHex(url);
+        File file = new File(FileUtilILZF.getTempFilePath() + tempName);
+        File fileHead = new File(FileUtilILZF.getTempFilePath() + tempName + "-head");
+        boolean fileExist = file.exists();
+        try (OutputStream output = response.getOutputStream();
+             OutputStream osFile = Files.newOutputStream(file.toPath());) {
+            //先判断是不是存在缓存
+            if (fileExist) {
+                byte[] bytes = FileUtil.readBytes(file);
+                String str = FileUtil.readString(fileHead, StandardCharsets.UTF_8);
+                JSONObject object = JSONUtil.parseObj(str);
+                Set<String> keySet = object.keySet();
+                keySet.forEach(key -> {
+                    response.setHeader(key, StringUtilIZLF.wrapperString(object.get(key)));
+                });
 
-            Map<String, List<String>> headerFields = httpUrlConn.getHeaderFields();
-            Set<String> keySet = headerFields.keySet();
-            keySet.forEach(key -> {
-                List<String> values = headerFields.get(key);
-                if (values.size() == 1) {
-                    response.setHeader(key, values.get(0));
-                }
-            });
-
-            byte[] a = new byte[1000];
-            int count = 0;
-            while ((count = input.read(a)) > -1) {
-                output.write(a, 0, count);
+                output.write(bytes);
+                output.flush();
+                return;
             }
-            input.close();
-            httpUrlConn.disconnect();
-            output.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    public static void getVideoByte(String url, HttpServletResponse response) {
-        String[] split = url.split("\\.");
-        String VideoType = split[split.length - 1];
-        try (OutputStream output = response.getOutputStream()) {
             HttpURLConnection httpUrlConn = getHttpURLConnection(url);
             //获取输入流
             InputStream input = httpUrlConn.getInputStream();
+
             Map<String, List<String>> headerFields = httpUrlConn.getHeaderFields();
             Set<String> keySet = headerFields.keySet();
+            JSONObject json = new JSONObject();
             keySet.forEach(key -> {
                 List<String> values = headerFields.get(key);
                 if (values.size() == 1) {
                     response.setHeader(key, values.get(0));
+                    json.set(key, values.get(0));
                 }
             });
-
+            FileUtil.writeString(json.toString(), fileHead, StandardCharsets.UTF_8);
 
             byte[] a = new byte[1000];
             int count = 0;
             while ((count = input.read(a)) > -1) {
                 output.write(a, 0, count);
+                osFile.write(a, 0, count);
             }
             input.close();
             httpUrlConn.disconnect();
             output.flush();
+            osFile.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }

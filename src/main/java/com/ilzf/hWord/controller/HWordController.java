@@ -2,18 +2,15 @@ package com.ilzf.hWord.controller;
 
 import com.ilzf.base.annotation.RequestBodyJson;
 import com.ilzf.base.entity.ResultEntity;
-import com.ilzf.hWord.entity.VideoInfoEntity;
 import com.ilzf.hWord.service.HentaiWordParseService;
 import com.ilzf.utils.NetUtilILZF;
 import com.ilzf.utils.StringUtilIZLF;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/hWord")
@@ -35,8 +32,7 @@ public class HWordController {
     }
 
     @RequestMapping("/getHtmlInfo")
-    public ResultEntity<?> getHtmlInfo(@RequestBody Map<String, String> map) {
-        String html = map.get("html");
+    public ResultEntity<?> getHtmlInfo(@RequestBodyJson("html") String html) {
         if (StringUtilIZLF.isBlankOrEmpty(html)) {
             return ResultEntity.error();
         }
@@ -47,8 +43,7 @@ public class HWordController {
     }
 
     @RequestMapping("/getVideoInfo")
-    public ResultEntity<?> getVideoInfo(@RequestBody Map<String, String> map) {
-        String html = map.get("html");
+    public ResultEntity<?> getVideoInfo(@RequestBodyJson("html") String html) {
         if (StringUtilIZLF.isBlankOrEmpty(html)) {
             return ResultEntity.error();
         }
@@ -60,8 +55,7 @@ public class HWordController {
     }
 
     @RequestMapping("/getImgInfo")
-    public ResultEntity<?> getImgInfo(@RequestBody Map<String, String> map) {
-        String html = map.get("html");
+    public ResultEntity<?> getImgInfo(@RequestBodyJson("html") String html) {
         if (StringUtilIZLF.isBlankOrEmpty(html)) {
             return ResultEntity.error();
         }
@@ -73,8 +67,7 @@ public class HWordController {
     }
 
     @RequestMapping("/getImgInfoOnly")
-    public ResultEntity<?> getImgInfoOnly(@RequestBody Map<String, String> map) {
-        String html = map.get("html");
+    public ResultEntity<?> getImgInfoOnly(@RequestBodyJson("html") String html) {
         if (StringUtilIZLF.isBlankOrEmpty(html)) {
             return ResultEntity.error();
         }
@@ -87,11 +80,11 @@ public class HWordController {
 
     @RequestMapping("/getImgByte")
     public void getImgByte(@RequestParam("path") String path, HttpServletResponse response) {
-        NetUtilILZF.getImgByte(path, response);
+        NetUtilILZF.getByteFromNet(path, response);
     }
 
     @RequestMapping("/getVideoByte")
     public void getVideoByte(@RequestParam("path") String path, HttpServletResponse response) {
-        NetUtilILZF.getVideoByte(path, response);
+        NetUtilILZF.getByteFromNet(path, response);
     }
 }
