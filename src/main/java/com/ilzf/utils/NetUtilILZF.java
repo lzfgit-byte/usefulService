@@ -56,9 +56,15 @@ public class NetUtilILZF {
     }
 
     public static String getHtmlByUrl(String urlStr) {
+
+        String tempName = StringUtilIZLF.md5(urlStr);
+        File file = new File(FileUtilILZF.getTempFilePath() + tempName + "-html");
         //建立连接
         StringBuffer sb = new StringBuffer();
         try {
+            if (file.exists()) {
+                return FileUtil.readString(file, StandardCharsets.UTF_8);
+            }
             HttpURLConnection httpUrlConn = getHttpURLConnection(urlStr);
             //获取输入流
             InputStream input = httpUrlConn.getInputStream();
@@ -72,6 +78,7 @@ public class NetUtilILZF {
                 sb.append(data);
                 data = br.readLine();
             }
+            FileUtil.writeString(sb.toString(), file, StandardCharsets.UTF_8);
             // 释放资源
             br.close();
             read.close();
@@ -85,8 +92,7 @@ public class NetUtilILZF {
     }
 
     public static void getByteFromNet(String url, HttpServletResponse response) {
-        MD5 md5 = MD5.create();
-        String tempName = md5.digestHex(url);
+        String tempName = StringUtilIZLF.md5(url);
         File file = new File(FileUtilILZF.getTempFilePath() + tempName);
         File fileHead = new File(FileUtilILZF.getTempFilePath() + tempName + "-head");
         boolean fileExist = file.exists();
