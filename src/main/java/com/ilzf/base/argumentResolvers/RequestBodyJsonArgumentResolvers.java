@@ -31,7 +31,7 @@ public class RequestBodyJsonArgumentResolvers implements HandlerMethodArgumentRe
         JSONObject jsonObject = JSONUtil.parseObj(str);
         String value_ = StringUtilIZLF.wrapperString(jsonObject.get(value));
         if(StringUtilIZLF.isBlankOrEmpty(value_)){
-            throw new Exception("RequestBodyJson 参数解析失败" + str);
+            return null;
         }
         if(String.class == parameterType){
             return  value_;
