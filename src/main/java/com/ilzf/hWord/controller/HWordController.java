@@ -1,5 +1,6 @@
 package com.ilzf.hWord.controller;
 
+import com.ilzf.base.annotation.RequestBodyJson;
 import com.ilzf.base.entity.ResultEntity;
 import com.ilzf.hWord.entity.VideoInfoEntity;
 import com.ilzf.hWord.service.HentaiWordParseService;
@@ -22,8 +23,7 @@ public class HWordController {
     HentaiWordParseService service;
 
     @RequestMapping("/getHtml")
-    public ResultEntity<?> getHtml(@RequestBody Map<String, String> map) {
-        String path = map.get("path");
+    public ResultEntity<?> getHtml(@RequestBodyJson("path") String path) {
         if (StringUtilIZLF.isBlankOrEmpty(path)) {
             return ResultEntity.error();
         }
