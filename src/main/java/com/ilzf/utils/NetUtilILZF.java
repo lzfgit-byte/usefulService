@@ -90,14 +90,15 @@ public class NetUtilILZF {
         File file = new File(FileUtilILZF.getTempFilePath() + tempName);
         File fileHead = new File(FileUtilILZF.getTempFilePath() + tempName + "-head");
         boolean fileExist = file.exists();
-        try (OutputStream output = response.getOutputStream();
-             OutputStream osFile = Files.newOutputStream(file.toPath());) {
+        try (OutputStream output = response.getOutputStream()) {
             //先判断是不是存在缓存
             if (fileExist) {
                 byte[] bytes = FileUtil.readBytes(file);
                 String str = FileUtil.readString(fileHead, StandardCharsets.UTF_8);
                 JSONObject object = JSONUtil.parseObj(str);
                 Set<String> keySet = object.keySet();
+                object.set("Modified", new Date().toString());
+                object.set("date", new Date().toString());
                 keySet.forEach(key -> {
                     response.setHeader(key, StringUtilIZLF.wrapperString(object.get(key)));
                 });
@@ -106,6 +107,7 @@ public class NetUtilILZF {
                 output.flush();
                 return;
             }
+            OutputStream osFile = Files.newOutputStream(file.toPath());
 
             HttpURLConnection httpUrlConn = getHttpURLConnection(url);
             //获取输入流
@@ -121,7 +123,6 @@ public class NetUtilILZF {
                     json.set(key, values.get(0));
                 }
             });
-            FileUtil.writeString(json.toString(), fileHead, StandardCharsets.UTF_8);
 
             byte[] a = new byte[1000];
             int count = 0;
@@ -133,6 +134,8 @@ public class NetUtilILZF {
             httpUrlConn.disconnect();
             output.flush();
             osFile.flush();
+            osFile.close();
+            FileUtil.writeString(json.toString(), fileHead, StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
         }
