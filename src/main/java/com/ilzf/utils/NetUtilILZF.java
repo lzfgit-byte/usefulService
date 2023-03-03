@@ -1,13 +1,11 @@
 package com.ilzf.utils;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.crypto.digest.MD5;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.dialect.Props;
 import lombok.SneakyThrows;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.*;
