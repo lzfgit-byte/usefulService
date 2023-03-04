@@ -1,7 +1,10 @@
 package com.ilzf.index.controller;
 
+import cn.hutool.json.JSONObject;
 import com.ilzf.base.annotation.RequestBodyJson;
 import com.ilzf.base.entity.ResultEntity;
+import com.ilzf.index.entity.SaveSomeData;
+import com.ilzf.utils.DataUtilILZF;
 import com.ilzf.utils.FileUtilILZF;
 import com.ilzf.utils.LogUtilILZF;
 import com.ilzf.utils.StringUtilIZLF;
@@ -28,7 +31,7 @@ public class TempController {
                 boolean delete = file1.delete();
                 allDelete.add(delete);
                 if (!delete) LogUtilILZF.log("文件【", file1.getName(), "】", "删除失败");
-            }else {
+            } else {
                 boolean delete = file1.delete();
                 allDelete.add(delete);
                 if (!delete) LogUtilILZF.log("文件【", file1.getName(), "】", "删除失败");
@@ -45,4 +48,18 @@ public class TempController {
         }
         return ResultEntity.error("部分失败");
     }
+
+    @RequestMapping("/getSaveData")
+    public ResultEntity<?> getSaveData(@RequestBodyJson("key") String key) {
+        JSONObject savedData = DataUtilILZF.getSavedData(SaveSomeData.class);
+        return ResultEntity.success(StringUtilIZLF.wrapperString(savedData.get(key)));
+    }
+
+    @RequestMapping("/doSaveData")
+    public ResultEntity<?> doSaveData(@RequestBodyJson("key") String key, @RequestBodyJson("setting") String setting) {
+        SaveSomeData saveSomeData = new SaveSomeData(key, setting);
+        DataUtilILZF.saveData(saveSomeData);
+        return ResultEntity.success();
+    }
+
 }
