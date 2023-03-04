@@ -42,6 +42,13 @@ public class HComicController {
         }
         return ResultEntity.success(hComicService.getReaderInfos(html));
     }
+    @RequestMapping("/getSearchInfo")
+    public ResultEntity<?> getSearchInfo(@RequestBodyJson("html") String html) {
+        if (StringUtilIZLF.isBlankOrEmpty(html)) {
+            return ResultEntity.error("html 为空");
+        }
+        return ResultEntity.success(hComicService.getSearchInfo(html));
+    }
 
 }
 
