@@ -63,4 +63,16 @@ public class StringUtilIZLF {
         }
         throw new Exception("转换失败");
     }
+
+    public static String getNotNullStrFormArr(String... args) {
+        String res = "";
+        for (String arg : args) {
+            if(isNotBlankOrEmpty(arg)){
+                return wrapperString(arg);
+            }
+        }
+
+
+        return res;
+    }
 }

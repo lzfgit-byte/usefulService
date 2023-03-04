@@ -1,9 +1,8 @@
 package com.ilzf.hWord.service;
 
-import cn.hutool.core.img.Img;
-import com.ilzf.base.entity.ResultEntity;
 import com.ilzf.hWord.entity.*;
 import com.ilzf.utils.NetUtilILZF;
+import com.ilzf.utils.ParseUtil;
 import com.ilzf.utils.StringUtilIZLF;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -21,11 +20,11 @@ public class HentaiWordParseService {
     public static final String MAIN_URL = "https://thehentaiworld.com/?new";
 
     public String helpGetElementAttr(Element e, String attr) {
-        return e != null ? e.attr(attr) : "";
+        return ParseUtil.helpGetElementAttr(e,attr);
     }
 
     public String helpGetElementText(Element e) {
-        return e != null ? e.text() : "";
+        return ParseUtil.helpGetElementText(e);
     }
 
     //主页信息
