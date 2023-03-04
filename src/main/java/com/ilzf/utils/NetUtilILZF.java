@@ -49,7 +49,7 @@ public class NetUtilILZF {
         }
         httpUrlConn.setDoInput(true);
         httpUrlConn.setRequestMethod("GET");
-        httpUrlConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+        httpUrlConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36");
         return httpUrlConn;
     }
 
@@ -146,6 +146,6 @@ public class NetUtilILZF {
     }
 
     public static void main(String[] args) {
-        System.out.println(getHtmlByUrl("https://thehentaiworld.com/?new"));
+        System.out.println(getHtmlByUrl("https://18comic.vip/"));
     }
 }
