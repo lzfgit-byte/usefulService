@@ -25,8 +25,8 @@ public class HWordController {
         if (StringUtilIZLF.isBlankOrEmpty(path)) {
             return ResultEntity.error();
         }
-//        BrowserUtil.getHtml(path,response);
-        String html = NetUtilILZF.getHtmlByUrl(path);
+        String html = BrowserUtil.getHtmlCAS(path);
+//        String html = NetUtilILZF.getHtmlByUrl(path);
         if (StringUtilIZLF.isBlankOrEmpty(html)) {
             return ResultEntity.error("html为空");
         }

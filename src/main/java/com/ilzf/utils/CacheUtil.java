@@ -15,32 +15,27 @@ public class CacheUtil {
     }
 
     public static boolean hasCache(String key) {
-        String tempName = StringUtilIZLF.md5(key);
-        File file = new File(FileUtilILZF.getTempFilePath() + tempName);
+        File file = new File(FileUtilILZF.getTempFilePath() + key);
         return file.exists();
     }
 
     public static String readStrCache(String key) {
-        String tempName = StringUtilIZLF.md5(key);
-        File file = new File(FileUtilILZF.getTempFilePath() + tempName);
+        File file = new File(FileUtilILZF.getTempFilePath() + key);
         return FileUtil.readString(file, StandardCharsets.UTF_8);
     }
 
     public static byte[] readByteCache(String key) {
-        String tempName = StringUtilIZLF.md5(key);
-        File file = new File(FileUtilILZF.getTempFilePath() + tempName);
+        File file = new File(FileUtilILZF.getTempFilePath() + key);
         return FileUtil.readBytes(file);
     }
 
     public static void setCache(String key, String value) {
-        String tempName = StringUtilIZLF.md5(key);
-        File file = new File(FileUtilILZF.getTempFilePath() + tempName);
+        File file = new File(FileUtilILZF.getTempFilePath() + key);
         FileUtil.writeString(value, file, StandardCharsets.UTF_8);
     }
 
     public static void setCache(String key, byte[] value) {
-        String tempName = StringUtilIZLF.md5(key);
-        File file = new File(FileUtilILZF.getTempFilePath() + tempName);
+        File file = new File(FileUtilILZF.getTempFilePath() + key);
         FileUtil.writeBytes(value, file);
     }
 
