@@ -1,5 +1,6 @@
 package com.ilzf.utils;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.ilzf.browser.LoadListenerImpl;
@@ -22,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BrowserUtil {
     private static final class BrowserInstance {
         public static Browser browser = null;
-        public static final ThreadLocal<byte[]> bBytes = new ThreadLocal<>();
+        public static final ThreadLocal<Map<String,byte[]>> bBytes = new ThreadLocal<>();
 
         static {
             BrowserContextParams bcp = new BrowserContextParams(BrowserPreferences.getDefaultDataDir());
@@ -80,22 +81,26 @@ public class BrowserUtil {
                         byte[] data = params.getData();
 
                         if (bBytes.get() == null) {
-                            bBytes.set(data);
+                            HashMap<String, byte[]> map = new HashMap<>();
+                            map.put(cacheKey,data);
+                            bBytes.set(map);
                         } else {
-                            byte[] bytes = bBytes.get();
+                            byte[] bytes = bBytes.get().get(cacheKey);
                             int total = data.length + bytes.length;
                             byte[] newB = new byte[total];
                             System.arraycopy(bytes, 0, newB, 0, bytes.length);
                             System.arraycopy(data, 0, newB, bytes.length, data.length);
-                            bBytes.set(newB);
+                            HashMap<String, byte[]> map = new HashMap<>();
+                            map.put(cacheKey,newB);
+                            bBytes.set(map);
                         }
                         String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
                         String s = CacheUtil.readStrCache(cacheHeadKey);
                         JSONObject obj = JSONUtil.parseObj(s);
                         Object origSize = obj.get("content-length");
                         Integer integer = Integer.valueOf(StringUtilIZLF.wrapperString(origSize));
-                        if (integer == bBytes.get().length) {
-                            CacheUtil.setCache(cacheKey, bBytes.get());
+                        if (integer == bBytes.get().get(cacheKey).length) {
+                            CacheUtil.setCache(cacheKey, bBytes.get().get(cacheKey));
                             bBytes.set(null);
                         }
 
@@ -186,6 +191,7 @@ public class BrowserUtil {
             Set<String> keySet = object.keySet();
             object.set("Modified", new Date().toString());
             object.set("date", new Date().toString());
+            log.info(ArrayUtil.join(keySet.toArray(), ","));
             keySet.forEach(key -> {
                 response.setHeader(key, StringUtilIZLF.wrapperString(object.get(key)));
             });
@@ -212,7 +218,7 @@ public class BrowserUtil {
         int a = 0;
         while (a < i) {
             a++;
-            Thread.sleep(100);
+            Thread.sleep(200);
             if (CacheUtil.hasCache(cacheKey)) {
                 writeToResponse(cacheKey, cacheHeadKey, response);
                 reentrantLock.unlock();
