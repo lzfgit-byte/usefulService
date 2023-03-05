@@ -83,7 +83,8 @@ public class HWordController {
     @RequestMapping("/getImgByte")
     public void getImgByte(@RequestParam("path") String path, HttpServletResponse response) {
 //        NetUtilILZF.getByteFromNet(path, response);
-        BrowserUtil.getByteFromNetCAS(path, response);
+
+        BrowserUtil.getByteFromNetCAS(path.substring(0, path.indexOf("?")), response);
     }
 
     @RequestMapping("/getVideoByte")

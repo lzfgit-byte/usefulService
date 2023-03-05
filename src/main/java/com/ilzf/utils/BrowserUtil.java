@@ -80,7 +80,7 @@ public class BrowserUtil {
                         String cacheKey = CacheUtil.getSaveCacheKey(url, null);
                         byte[] data = params.getData();
 
-                        if (bBytes.get() == null) {
+                        if (bBytes.get() == null || !bBytes.get().containsKey(cacheKey)) {
                             HashMap<String, byte[]> map = new HashMap<>();
                             map.put(cacheKey,data);
                             bBytes.set(map);
@@ -101,9 +101,7 @@ public class BrowserUtil {
                         Integer integer = Integer.valueOf(StringUtilIZLF.wrapperString(origSize));
                         if (integer == bBytes.get().get(cacheKey).length) {
                             CacheUtil.setCache(cacheKey, bBytes.get().get(cacheKey));
-                            Map<String, byte[]> map = bBytes.get();
-                            map.put(cacheKey,new byte[]{});
-                            bBytes.set(map);
+                            bBytes.set(null);
                         }
 
                     }
@@ -227,6 +225,7 @@ public class BrowserUtil {
                 return;
             }
         }
+
         reentrantLock.unlock();
     }
 
