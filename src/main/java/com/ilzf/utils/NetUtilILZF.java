@@ -56,12 +56,12 @@ public class NetUtilILZF {
     public static String getHtmlByUrl(String urlStr) {
 
         String tempName = StringUtilIZLF.md5(urlStr);
-        File file = new File(FileUtilILZF.getTempFilePath() + tempName + "-html");
+        String cacheKey = FileUtilILZF.getTempFilePath() + tempName + "-html";
         //建立连接
         StringBuffer sb = new StringBuffer();
         try {
-            if (file.exists()) {
-                return FileUtil.readString(file, StandardCharsets.UTF_8);
+            if (CacheUtil.hasCache(cacheKey)) {
+                return CacheUtil.readStrCache(cacheKey);
             }
             HttpURLConnection httpUrlConn = getHttpURLConnection(urlStr);
             //获取输入流
@@ -76,7 +76,7 @@ public class NetUtilILZF {
                 sb.append(data);
                 data = br.readLine();
             }
-            FileUtil.writeString(sb.toString(), file, StandardCharsets.UTF_8);
+            CacheUtil.setCache(cacheKey, sb.toString());
             // 释放资源
             br.close();
             read.close();
@@ -91,14 +91,14 @@ public class NetUtilILZF {
 
     public static void getByteFromNet(String url, HttpServletResponse response) {
         String tempName = StringUtilIZLF.md5(url);
-        File file = new File(FileUtilILZF.getTempFilePath() + tempName);
-        File fileHead = new File(FileUtilILZF.getTempFilePath() + tempName + "-head");
-        boolean fileExist = file.exists();
+        String cacheKey = FileUtilILZF.getTempFilePath() + tempName;
+        String cacheHeadKey = FileUtilILZF.getTempFilePath() + tempName + "-head";
+
         try (OutputStream output = response.getOutputStream()) {
             //先判断是不是存在缓存
-            if (fileExist) {
-                byte[] bytes = FileUtil.readBytes(file);
-                String str = FileUtil.readString(fileHead, StandardCharsets.UTF_8);
+            if (CacheUtil.hasCache(cacheKey)) {
+                byte[] bytes = CacheUtil.readByteCache(cacheKey);
+                String str = CacheUtil.readStrCache(cacheHeadKey);
                 JSONObject object = JSONUtil.parseObj(str);
                 Set<String> keySet = object.keySet();
                 object.set("Modified", new Date().toString());
@@ -111,7 +111,6 @@ public class NetUtilILZF {
                 output.flush();
                 return;
             }
-            OutputStream osFile = Files.newOutputStream(file.toPath());
 
             HttpURLConnection httpUrlConn = getHttpURLConnection(url);
             //获取输入流
@@ -129,17 +128,23 @@ public class NetUtilILZF {
             });
 
             byte[] a = new byte[1000];
+            List<Byte> save = new ArrayList<>();
             int count = 0;
             while ((count = input.read(a)) > -1) {
                 output.write(a, 0, count);
-                osFile.write(a, 0, count);
+                for (int i = 0; i < count; i++) {
+                    save.add(a[i]);
+                }
             }
             input.close();
             httpUrlConn.disconnect();
             output.flush();
-            osFile.flush();
-            osFile.close();
-            FileUtil.writeString(json.toString(), fileHead, StandardCharsets.UTF_8);
+            byte[] dSa = new byte[save.size()];
+            for (int i = 0; i < save.size(); i++) {
+                dSa[i] = save.get(i);
+            }
+            CacheUtil.setCache(cacheKey,dSa);
+            CacheUtil.setCache(cacheHeadKey, json.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }

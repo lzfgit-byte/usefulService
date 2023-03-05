@@ -3,6 +3,7 @@ package com.ilzf.hWord.controller;
 import com.ilzf.base.annotation.RequestBodyJson;
 import com.ilzf.base.entity.ResultEntity;
 import com.ilzf.hWord.service.HentaiWordParseService;
+import com.ilzf.utils.BrowserUtil;
 import com.ilzf.utils.NetUtilILZF;
 import com.ilzf.utils.StringUtilIZLF;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,11 @@ public class HWordController {
     HentaiWordParseService service;
 
     @RequestMapping("/getHtml")
-    public ResultEntity<?> getHtml(@RequestBodyJson("path") String path) {
+    public ResultEntity<?> getHtml(@RequestBodyJson("path") String path,HttpServletResponse response) {
         if (StringUtilIZLF.isBlankOrEmpty(path)) {
             return ResultEntity.error();
         }
+        BrowserUtil.getHtml(path,response);
         String html = NetUtilILZF.getHtmlByUrl(path);
         if (StringUtilIZLF.isBlankOrEmpty(html)) {
             return ResultEntity.error("html为空");
