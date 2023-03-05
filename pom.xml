@@ -70,7 +70,42 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.15.4</version>
 		</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.apache.httpcomponents.core5</groupId>
+			<artifactId>httpcore5</artifactId>
+			<version>5.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<version>5.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.htmlunit</groupId>
+			<artifactId>htmlunit</artifactId>
+			<version>2.70.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.teamdev.jxbrowser</groupId>
+			<artifactId>jxbrowser-win64</artifactId>
+			<version>7.12.2</version>
+		</dependency>
+		<dependency>
+			<groupId>jxborwser</groupId>
+			<artifactId>jxborwser</artifactId>
+			<scope>system</scope>
+			<version>6.14</version>
+			<systemPath>${project.basedir}/lib/jxbrowser-6.14.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>jxborwserWin32</groupId>
+			<artifactId>jxborwserWin32</artifactId>
+			<version>6.14</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/jxbrowser-win32-6.14.jar</systemPath>
+		</dependency>
+
+	</dependencies>
 
 	<build>
 		<plugins>
