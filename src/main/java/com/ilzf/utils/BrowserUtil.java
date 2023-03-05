@@ -90,7 +90,7 @@ public class BrowserUtil {
                             byte[] newB = new byte[total];
                             System.arraycopy(bytes, 0, newB, 0, bytes.length);
                             System.arraycopy(data, 0, newB, bytes.length, data.length);
-                            HashMap<String, byte[]> map = new HashMap<>();
+                            Map<String, byte[]> map = bBytes.get();
                             map.put(cacheKey,newB);
                             bBytes.set(map);
                         }
@@ -101,7 +101,9 @@ public class BrowserUtil {
                         Integer integer = Integer.valueOf(StringUtilIZLF.wrapperString(origSize));
                         if (integer == bBytes.get().get(cacheKey).length) {
                             CacheUtil.setCache(cacheKey, bBytes.get().get(cacheKey));
-                            bBytes.set(null);
+                            Map<String, byte[]> map = bBytes.get();
+                            map.put(cacheKey,new byte[]{});
+                            bBytes.set(map);
                         }
 
                     }
