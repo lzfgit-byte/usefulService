@@ -21,7 +21,7 @@ public class HWordController {
     HentaiWordParseService service;
 
     @RequestMapping("/getHtml")
-    public ResultEntity<?> getHtml(@RequestBodyJson("path") String path,HttpServletResponse response) {
+    public ResultEntity<?> getHtml(@RequestBodyJson("path") String path, HttpServletResponse response) {
         if (StringUtilIZLF.isBlankOrEmpty(path)) {
             return ResultEntity.error();
         }
@@ -82,7 +82,8 @@ public class HWordController {
 
     @RequestMapping("/getImgByte")
     public void getImgByte(@RequestParam("path") String path, HttpServletResponse response) {
-        NetUtilILZF.getByteFromNet(path, response);
+//        NetUtilILZF.getByteFromNet(path, response);
+        BrowserUtil.getByteFromNetCAS(path, response);
     }
 
     @RequestMapping("/getVideoByte")

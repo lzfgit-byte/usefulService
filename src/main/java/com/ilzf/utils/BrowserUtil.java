@@ -1,16 +1,22 @@
 package com.ilzf.utils;
 
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.ilzf.browser.LoadListenerImpl;
 import com.teamdev.jxbrowser.chromium.*;
 import com.teamdev.jxbrowser.chromium.events.*;
-import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.DefaultNetworkDelegate;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.*;
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 @Slf4j
@@ -23,6 +29,8 @@ public class BrowserUtil {
             bcp.setProxyConfig(new CustomProxyConfig("http=127.0.0.1:10801;https=127.0.0.1:10801;socks=127.0.0.1:10801"));
             BrowserContext browserContext = new BrowserContext(bcp);
             browser = new Browser(browserContext);
+            BrowserPreferences preferences = browser.getPreferences();
+            preferences.setJavaScriptEnabled(false);
 
 //
 //            JFrame frame = new JFrame();
@@ -47,38 +55,22 @@ public class BrowserUtil {
                     if (mimeType.contains("image")) {
                         String cacheKey = CacheUtil.getSaveCacheKey(url, null);
                         String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
+                        if (CacheUtil.hasCache(cacheKey)) {
+                            return;
+                        }
                         byte[] data = params.getData();
                         JSONObject head = new JSONObject();
                         head.set("content-length", data.length);
-                        head.set("content-type", mimeType) ;
+                        head.set("content-type", mimeType);
+                        head.set("accept-ranges", "bytes");
                         CacheUtil.setCache(cacheKey, data);
-                        CacheUtil.setCache(cacheHeadKey,head.toString());
+                        CacheUtil.setCache(cacheHeadKey, head.toString());
                     }
                     super.onDataReceived(params);
                 }
             });
 
-            browser.addLoadListener(new LoadListener() {
-                @Override
-                public void onStartLoadingFrame(StartLoadingEvent startLoadingEvent) {
-                    log.info("onStartLoadingFrame");
-                }
-
-                @Override
-                public void onProvisionalLoadingFrame(ProvisionalLoadingEvent provisionalLoadingEvent) {
-                    log.info("onProvisionalLoadingFrame");
-                }
-
-                @Override
-                public void onFinishLoadingFrame(FinishLoadingEvent finishLoadingEvent) {
-                    log.info("onFinishLoadingFrame");
-                }
-
-                @Override
-                public void onFailLoadingFrame(FailLoadingEvent failLoadingEvent) {
-                    log.info("onFailLoadingFrame");
-                }
-
+            browser.addLoadListener(new LoadListenerImpl() {
                 @Override
                 public void onDocumentLoadedInFrame(FrameLoadEvent frameLoadEvent) {
                     Browser browser1 = frameLoadEvent.getBrowser();
@@ -87,20 +79,8 @@ public class BrowserUtil {
                     String saveCacheKey = CacheUtil.getSaveCacheKey(url, "-html");
                     log.info("onDocumentLoadedInFrame" + html.length());
                     if (StringUtilIZLF.isNotBlankOrEmpty(html) && frameLoadEvent.isMainFrame()) {
-//                        CacheUtil.setCache(saveCacheKey, html);
+                        CacheUtil.setCache(saveCacheKey, html);
                     }
-                }
-
-                @Override
-                public void onDocumentLoadedInMainFrame(LoadEvent loadEvent) {
-                    log.info("onDocumentLoadedInMainFrame");
-                }
-            });
-            browser.setDownloadHandler(new DownloadHandler() {
-                @Override
-                public boolean allowDownload(DownloadItem downloadItem) {
-                    System.out.println("");
-                    return true;
                 }
             });
         }
@@ -130,11 +110,16 @@ public class BrowserUtil {
         return "";
     }
 
+    public static void getByte(String url) {
+        Browser browser = getBrowser();
+        browser.loadURL(url);
+    }
+
     @SneakyThrows
     public static String getHtmlCAS(String url) {
         String html = getHtml(url);
         if (StringUtilIZLF.isNotBlankOrEmpty(html)) {
-            URL_CACHE.clear();
+            URL_CACHE.remove(url);
             return html;
         }
         int i = 20;
@@ -147,12 +132,62 @@ public class BrowserUtil {
                 break;
             }
         }
-        URL_CACHE.clear();
+        URL_CACHE.remove(url);
         return html;
+    }
+
+    public static void writeToResponse(String cacheKey, String cacheHeadKey, HttpServletResponse response) {
+        try (OutputStream output = response.getOutputStream()) {
+            byte[] bytes = CacheUtil.readByteCache(cacheKey);
+            String str = CacheUtil.readStrCache(cacheHeadKey);
+            JSONObject object = JSONUtil.parseObj(str);
+            Set<String> keySet = object.keySet();
+            object.set("Modified", new Date().toString());
+            object.set("date", new Date().toString());
+            keySet.forEach(key -> {
+                response.setHeader(key, StringUtilIZLF.wrapperString(object.get(key)));
+            });
+
+            output.write(bytes);
+            output.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SneakyThrows
+    public static void getByteFromNetCAS(String url, HttpServletResponse response) {
+        String cacheUrl = url + "image";
+        String cacheKey = CacheUtil.getSaveCacheKey(url, null);
+        String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
+        if (CacheUtil.hasCache(cacheKey)) {
+            writeToResponse(cacheKey, cacheHeadKey, response);
+            URL_CACHE.remove(cacheUrl);
+            return;
+        }
+        ReentrantLock reentrantLock = new ReentrantLock();
+        reentrantLock.lock();
+        getByte(url);
+        URL_CACHE.add(cacheUrl);
+        int i = 20;
+        int a = 0;
+        while (a < i) {
+            a++;
+            Thread.sleep(100);
+            if (CacheUtil.hasCache(cacheKey)) {
+                writeToResponse(cacheKey, cacheHeadKey, response);
+                URL_CACHE.remove(cacheUrl);
+                reentrantLock.unlock();
+                return;
+            }
+        }
+        reentrantLock.unlock();
+        URL_CACHE.remove(cacheUrl);
     }
 
     public static void main(String[] args) {
         //https://cdn-msp.18comic.vip/media/albums/393452_3x4.jpg?v=1677999015
-        getHtml("https://cdn-msp.18comic.vip/media/albums/393452_3x4.jpg?v=1677999015");
+//        getHtml("https://cdn-msp.18comic.vip/media/albums/296782_3x4.jpg?v=1677941225");
+        getByte("https://cdn-msp.18comic.org/media/albums/396125_3x4.jpg?v=1677999036");
     }
 }
