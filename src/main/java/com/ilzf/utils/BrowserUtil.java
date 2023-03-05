@@ -5,11 +5,13 @@ import cn.hutool.json.JSONUtil;
 import com.ilzf.browser.LoadListenerImpl;
 import com.teamdev.jxbrowser.chromium.*;
 import com.teamdev.jxbrowser.chromium.events.*;
+import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.DefaultNetworkDelegate;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.*;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,7 +25,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BrowserUtil {
     private static final class BrowserInstance {
         public static Browser browser = null;
-
         static {
             BrowserContextParams bcp = new BrowserContextParams(BrowserPreferences.getDefaultDataDir());
             bcp.setProxyConfig(new CustomProxyConfig("http=127.0.0.1:10801;https=127.0.0.1:10801;socks=127.0.0.1:10801"));
@@ -33,21 +34,27 @@ public class BrowserUtil {
             preferences.setJavaScriptEnabled(false);
 
 //
-//            JFrame frame = new JFrame();
-//            frame.getContentPane().setEnabled(false);
-//            frame.setSize(800, 600);
-//            frame.getContentPane().setLayout(null);
-//
-////            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-//            frame.setLocationByPlatform(true);
-//            frame.setVisible(true);
-//            BrowserView view = new BrowserView(browser);
-//            view.setBounds(152, 39, 800, 600);
-//            frame.getContentPane().add(view);
+            JFrame frame = new JFrame();
+            frame.getContentPane().setEnabled(false);
+            frame.setSize(800, 600);
+            frame.getContentPane().setLayout(null);
+
+//            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            frame.setLocationByPlatform(true);
+            frame.setVisible(true);
+            BrowserView view = new BrowserView(browser);
+            view.setBounds(152, 39, 800, 600);
+            frame.getContentPane().add(view);
 
 
             BrowserContext context = browser.getContext();
             context.getNetworkService().setNetworkDelegate(new DefaultNetworkDelegate() {
+                @Override
+                public void onCompleted(RequestCompletedParams params) {
+                    System.out.println("");
+                    super.onCompleted(params);
+                }
+
                 @Override
                 public void onDataReceived(DataReceivedParams params) {
                     String mimeType = params.getMimeType();
@@ -56,6 +63,23 @@ public class BrowserUtil {
                         String cacheKey = CacheUtil.getSaveCacheKey(url, null);
                         String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
                         if (CacheUtil.hasCache(cacheKey)) {
+                            byte[] bytes = CacheUtil.readByteCache(cacheKey);
+                            byte[] data = params.getData();
+                            int length = bytes.length + data.length;
+                            byte[] newByte = new byte[length];
+                            for (int i = 0; i < bytes.length; i++) {
+                                newByte[i] = bytes[i];
+                            }
+                            for (int i = 0; i < data.length; i++) {
+                                newByte[bytes.length + i] = bytes[i];
+                            }
+                            JSONObject head = new JSONObject();
+                            head.set("content-length", newByte.length);
+                            head.set("content-type", mimeType);
+                            head.set("accept-ranges", "bytes");
+                            CacheUtil.setCache(cacheKey, newByte);
+                            CacheUtil.setCache(cacheHeadKey, head.toString());
+
                             return;
                         }
                         byte[] data = params.getData();
@@ -115,6 +139,14 @@ public class BrowserUtil {
         browser.loadURL(url);
     }
 
+    public static void getByteFormatHtml(String html) {
+        Browser browser = getBrowser();
+        StringBuffer sb = new StringBuffer("<html><head><meta name=\"viewport\" content=\"width=device-width, minimum-scale=0.1\"><title>425375_3x4.jpg (400×533)</title></head><body style=\"margin: 0px;\"><img style=\"user-select: none; cursor: zoom-in;\" src=\"");
+        sb.append(html);
+        sb.append("\" width=\"0\" height=\"0\"></body></html>");
+        browser.loadHTML(sb.toString());
+    }
+
     @SneakyThrows
     public static String getHtmlCAS(String url) {
         String html = getHtml(url);
@@ -167,7 +199,7 @@ public class BrowserUtil {
         }
         ReentrantLock reentrantLock = new ReentrantLock();
         reentrantLock.lock();
-        getByte(url);
+        getByteFormatHtml(url);
         URL_CACHE.add(cacheUrl);
         int i = 20;
         int a = 0;
@@ -188,6 +220,6 @@ public class BrowserUtil {
     public static void main(String[] args) {
         //https://cdn-msp.18comic.vip/media/albums/393452_3x4.jpg?v=1677999015
 //        getHtml("https://cdn-msp.18comic.vip/media/albums/296782_3x4.jpg?v=1677941225");
-        getByte("https://cdn-msp.18comic.org/media/albums/396125_3x4.jpg?v=1677999036");
+        getByte("https://cdn-msp.18comic.org/media/albums/352011_3x4.jpg?v=1677998986");
     }
 }
