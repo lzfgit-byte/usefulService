@@ -16,14 +16,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 //import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 
 @Slf4j
 public class BrowserUtil {
+    public static ArrayBlockingQueue<String> abq = new ArrayBlockingQueue<>(30);
     private static final class BrowserInstance {
         public static Browser browser = null;
-        public static final ThreadLocal<Map<String,byte[]>> bBytes = new ThreadLocal<>();
+        public static final ThreadLocal<Map<String, byte[]>> bBytes = new ThreadLocal<>();
 
         static {
             BrowserContextParams bcp = new BrowserContextParams(BrowserPreferences.getDefaultDataDir());
@@ -82,7 +84,7 @@ public class BrowserUtil {
 
                         if (bBytes.get() == null || !bBytes.get().containsKey(cacheKey)) {
                             HashMap<String, byte[]> map = new HashMap<>();
-                            map.put(cacheKey,data);
+                            map.put(cacheKey, data);
                             bBytes.set(map);
                         } else {
                             byte[] bytes = bBytes.get().get(cacheKey);
@@ -91,7 +93,7 @@ public class BrowserUtil {
                             System.arraycopy(bytes, 0, newB, 0, bytes.length);
                             System.arraycopy(data, 0, newB, bytes.length, data.length);
                             Map<String, byte[]> map = bBytes.get();
-                            map.put(cacheKey,newB);
+                            map.put(cacheKey, newB);
                             bBytes.set(map);
                         }
                         String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
@@ -213,12 +215,13 @@ public class BrowserUtil {
         }
         ReentrantLock reentrantLock = new ReentrantLock();
         reentrantLock.lock();
+        abq.add(url);
         getByte(url);
         int i = 1000;
         int a = 0;
         while (a < i) {
             a++;
-            Thread.sleep(10);
+            Thread.sleep(100);
             if (CacheUtil.hasCache(cacheKey)) {
                 writeToResponse(cacheKey, cacheHeadKey, response);
                 reentrantLock.unlock();
