@@ -169,11 +169,11 @@ public class BrowserUtil {
             URL_CACHE.remove(url);
             return html;
         }
-        int i = 100;
+        int i = 1000;
         int a = 0;
         while (a < i) {
             a++;
-            Thread.sleep(100);
+            Thread.sleep(10);
             html = getHtml(url);
             if (StringUtilIZLF.isNotBlankOrEmpty(html)) {
                 break;
@@ -214,11 +214,11 @@ public class BrowserUtil {
         ReentrantLock reentrantLock = new ReentrantLock();
         reentrantLock.lock();
         getByte(url);
-        int i = 100;
+        int i = 1000;
         int a = 0;
         while (a < i) {
             a++;
-            Thread.sleep(200);
+            Thread.sleep(10);
             if (CacheUtil.hasCache(cacheKey)) {
                 writeToResponse(cacheKey, cacheHeadKey, response);
                 reentrantLock.unlock();
