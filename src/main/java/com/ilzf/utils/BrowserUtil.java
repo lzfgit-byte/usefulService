@@ -14,10 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.swing.*;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 
@@ -56,12 +53,30 @@ public class BrowserUtil {
                 }
 
                 @Override
+                public void onHeadersReceived(HeadersReceivedParams params) {
+                    String url = params.getURL();
+                    String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
+                    HttpHeadersEx headersEx = params.getHeadersEx();
+                    Map<String, List<String>> headers = headersEx.getHeaders();
+                    Set<String> keySet = headers.keySet();
+                    JSONObject head = new JSONObject();
+                    keySet.forEach(key -> {
+                        List<String> values = headers.get(key);
+                        if (values.size() == 1) {
+                            head.set(key, values.get(0));
+                        }
+                    });
+                    CacheUtil.setCache(cacheHeadKey, head.toString());
+                    super.onHeadersReceived(params);
+                }
+
+                @Override
                 public void onDataReceived(DataReceivedParams params) {
                     String mimeType = params.getMimeType();
                     String url = params.getURL();
                     if (mimeType.contains("image")) {
                         String cacheKey = CacheUtil.getSaveCacheKey(url, null);
-                        String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
+
                         if (CacheUtil.hasCache(cacheKey)) {
                             byte[] bytes = CacheUtil.readByteCache(cacheKey);
                             byte[] data = params.getData();
@@ -73,22 +88,12 @@ public class BrowserUtil {
                             for (int i = 0; i < data.length; i++) {
                                 newByte[bytes.length + i] = bytes[i];
                             }
-                            JSONObject head = new JSONObject();
-                            head.set("content-length", newByte.length);
-                            head.set("content-type", mimeType);
-                            head.set("accept-ranges", "bytes");
-                            CacheUtil.setCache(cacheKey, newByte);
-                            CacheUtil.setCache(cacheHeadKey, head.toString());
 
+                            CacheUtil.setCache(cacheKey, newByte);
                             return;
                         }
                         byte[] data = params.getData();
-                        JSONObject head = new JSONObject();
-                        head.set("content-length", data.length);
-                        head.set("content-type", mimeType);
-                        head.set("accept-ranges", "bytes");
                         CacheUtil.setCache(cacheKey, data);
-                        CacheUtil.setCache(cacheHeadKey, head.toString());
                     }
                     super.onDataReceived(params);
                 }
