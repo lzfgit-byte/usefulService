@@ -55,8 +55,7 @@ public class NetUtilILZF {
 
     public static String getHtmlByUrl(String urlStr) {
 
-        String tempName = StringUtilIZLF.md5(urlStr);
-        String cacheKey = FileUtilILZF.getTempFilePath() + tempName + "-html";
+        String cacheKey = CacheUtil.getSaveCacheKey(urlStr,"-html");
         //建立连接
         StringBuffer sb = new StringBuffer();
         try {
@@ -90,9 +89,8 @@ public class NetUtilILZF {
     }
 
     public static void getByteFromNet(String url, HttpServletResponse response) {
-        String tempName = StringUtilIZLF.md5(url);
-        String cacheKey = FileUtilILZF.getTempFilePath() + tempName;
-        String cacheHeadKey = FileUtilILZF.getTempFilePath() + tempName + "-head";
+        String cacheKey = CacheUtil.getSaveCacheKey(url,null);
+        String cacheHeadKey = CacheUtil.getSaveCacheKey(url,"-head");
 
         try (OutputStream output = response.getOutputStream()) {
             //先判断是不是存在缓存

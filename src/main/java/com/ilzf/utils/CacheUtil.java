@@ -7,6 +7,13 @@ import java.nio.charset.StandardCharsets;
 
 public class CacheUtil {
 
+    public static String getSaveCacheKey(String url, String salt) {
+        if (StringUtilIZLF.isNotBlankOrEmpty(salt)) {
+            return StringUtilIZLF.md5(url) + salt;
+        }
+        return StringUtilIZLF.md5(url);
+    }
+
     public static boolean hasCache(String key) {
         String tempName = StringUtilIZLF.md5(key);
         File file = new File(FileUtilILZF.getTempFilePath() + tempName);
