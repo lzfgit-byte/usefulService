@@ -47,7 +47,7 @@ public class HComicService {
             tags_.add(new HCTags(title_, jumpUrl_));
         });
         heart = helpGetElementText(element.selectFirst(".label-loveicon span"));
-        res.add(new HCComicCover(coverUrl, jumpUrl, title, ArrayUtil.join(author_, ","), type_, tags_, heart));
+        res.add(new HCComicCover(coverUrl, jumpUrl, title, ArrayUtil.join(author_.toArray(), ","), type_, tags_, heart));
     }
 
     public void loadRes(List<HCComicCover> res, Element element) {
