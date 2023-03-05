@@ -1,10 +1,14 @@
 package com.ilzf.utils;
 
+import cn.hutool.json.JSONObject;
 import com.teamdev.jxbrowser.chromium.*;
 import com.teamdev.jxbrowser.chromium.events.*;
+import com.teamdev.jxbrowser.chromium.swing.BrowserView;
+import com.teamdev.jxbrowser.chromium.swing.DefaultNetworkDelegate;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +23,41 @@ public class BrowserUtil {
             bcp.setProxyConfig(new CustomProxyConfig("http=127.0.0.1:10801;https=127.0.0.1:10801;socks=127.0.0.1:10801"));
             BrowserContext browserContext = new BrowserContext(bcp);
             browser = new Browser(browserContext);
+
+//
+//            JFrame frame = new JFrame();
+//            frame.getContentPane().setEnabled(false);
+//            frame.setSize(800, 600);
+//            frame.getContentPane().setLayout(null);
+//
+////            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//            frame.setLocationByPlatform(true);
+//            frame.setVisible(true);
+//            BrowserView view = new BrowserView(browser);
+//            view.setBounds(152, 39, 800, 600);
+//            frame.getContentPane().add(view);
+
+
+            BrowserContext context = browser.getContext();
+            context.getNetworkService().setNetworkDelegate(new DefaultNetworkDelegate() {
+                @Override
+                public void onDataReceived(DataReceivedParams params) {
+                    String mimeType = params.getMimeType();
+                    String url = params.getURL();
+                    if (mimeType.contains("image")) {
+                        String cacheKey = CacheUtil.getSaveCacheKey(url, null);
+                        String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
+                        byte[] data = params.getData();
+                        JSONObject head = new JSONObject();
+                        head.set("content-length", data.length);
+                        head.set("content-type", mimeType) ;
+                        CacheUtil.setCache(cacheKey, data);
+                        CacheUtil.setCache(cacheHeadKey,head.toString());
+                    }
+                    super.onDataReceived(params);
+                }
+            });
+
             browser.addLoadListener(new LoadListener() {
                 @Override
                 public void onStartLoadingFrame(StartLoadingEvent startLoadingEvent) {
@@ -48,13 +87,20 @@ public class BrowserUtil {
                     String saveCacheKey = CacheUtil.getSaveCacheKey(url, "-html");
                     log.info("onDocumentLoadedInFrame" + html.length());
                     if (StringUtilIZLF.isNotBlankOrEmpty(html) && frameLoadEvent.isMainFrame()) {
-                        CacheUtil.setCache(saveCacheKey, html);
+//                        CacheUtil.setCache(saveCacheKey, html);
                     }
                 }
 
                 @Override
                 public void onDocumentLoadedInMainFrame(LoadEvent loadEvent) {
                     log.info("onDocumentLoadedInMainFrame");
+                }
+            });
+            browser.setDownloadHandler(new DownloadHandler() {
+                @Override
+                public boolean allowDownload(DownloadItem downloadItem) {
+                    System.out.println("");
+                    return true;
                 }
             });
         }
@@ -103,5 +149,10 @@ public class BrowserUtil {
         }
         URL_CACHE.clear();
         return html;
+    }
+
+    public static void main(String[] args) {
+        //https://cdn-msp.18comic.vip/media/albums/393452_3x4.jpg?v=1677999015
+        getHtml("https://cdn-msp.18comic.vip/media/albums/393452_3x4.jpg?v=1677999015");
     }
 }
