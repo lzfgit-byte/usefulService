@@ -199,18 +199,15 @@ public class BrowserUtil {
 
     @SneakyThrows
     public static void getByteFromNetCAS(String url, HttpServletResponse response) {
-        String cacheUrl = url + "image";
         String cacheKey = CacheUtil.getSaveCacheKey(url, null);
         String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
         if (CacheUtil.hasCache(cacheKey)) {
             writeToResponse(cacheKey, cacheHeadKey, response);
-            URL_CACHE.remove(cacheUrl);
             return;
         }
         ReentrantLock reentrantLock = new ReentrantLock();
         reentrantLock.lock();
         getByte(url);
-        URL_CACHE.add(cacheUrl);
         int i = 100;
         int a = 0;
         while (a < i) {
@@ -218,13 +215,11 @@ public class BrowserUtil {
             Thread.sleep(100);
             if (CacheUtil.hasCache(cacheKey)) {
                 writeToResponse(cacheKey, cacheHeadKey, response);
-                URL_CACHE.remove(cacheUrl);
                 reentrantLock.unlock();
                 return;
             }
         }
         reentrantLock.unlock();
-        URL_CACHE.remove(cacheUrl);
     }
 
     public static void main(String[] args) {
