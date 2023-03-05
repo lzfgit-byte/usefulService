@@ -82,25 +82,31 @@ public class BrowserUtil {
                         String cacheKey = CacheUtil.getSaveCacheKey(url, null);
                         byte[] data = params.getData();
 
-                        if (bBytes.get() == null || !bBytes.get().containsKey(cacheKey)) {
+                        if (bBytes.get() == null) {
                             HashMap<String, byte[]> map = new HashMap<>();
                             map.put(cacheKey, data);
                             bBytes.set(map);
                         } else {
-                            byte[] bytes = bBytes.get().get(cacheKey);
-                            int total = data.length + bytes.length;
-                            byte[] newB = new byte[total];
-                            System.arraycopy(bytes, 0, newB, 0, bytes.length);
-                            System.arraycopy(data, 0, newB, bytes.length, data.length);
-                            Map<String, byte[]> map = bBytes.get();
-                            map.put(cacheKey, newB);
-                            bBytes.set(map);
+                            if(bBytes.get().containsKey(cacheKey)){
+                                byte[] bytes = bBytes.get().get(cacheKey);
+                                int total = data.length + bytes.length;
+                                byte[] newB = new byte[total];
+                                System.arraycopy(bytes, 0, newB, 0, bytes.length);
+                                System.arraycopy(data, 0, newB, bytes.length, data.length);
+                                Map<String, byte[]> map = bBytes.get();
+                                map.put(cacheKey, newB);
+                                bBytes.set(map);
+                            }else {
+                                Map<String, byte[]> map = bBytes.get();
+                                map.put(cacheKey,params.getData());
+                            }
+
                         }
                         String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
                         String s = CacheUtil.readStrCache(cacheHeadKey);
                         JSONObject obj = JSONUtil.parseObj(s);
                         Object origSize = obj.get("content-length");
-                        Integer integer = Integer.valueOf(StringUtilIZLF.wrapperString(origSize));
+                        int integer = Integer.valueOf(StringUtilIZLF.wrapperString(origSize));
                         if (integer == bBytes.get().get(cacheKey).length) {
                             CacheUtil.setCache(cacheKey, bBytes.get().get(cacheKey));
                             bBytes.set(null);
@@ -215,7 +221,6 @@ public class BrowserUtil {
         }
         ReentrantLock reentrantLock = new ReentrantLock();
         reentrantLock.lock();
-        abq.add(url);
         getByte(url);
         int i = 1000;
         int a = 0;
