@@ -5,15 +5,15 @@ import cn.hutool.json.JSONUtil;
 import com.ilzf.browser.LoadListenerImpl;
 import com.teamdev.jxbrowser.chromium.*;
 import com.teamdev.jxbrowser.chromium.events.*;
-import com.teamdev.jxbrowser.chromium.swing.BrowserView;
+//import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.DefaultNetworkDelegate;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.*;
+//import javax.swing.*;
 import java.io.OutputStream;
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -22,6 +22,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BrowserUtil {
     private static final class BrowserInstance {
         public static Browser browser = null;
+        public static final ThreadLocal<byte[]> bBytes = new ThreadLocal<>();
+
         static {
             BrowserContextParams bcp = new BrowserContextParams(BrowserPreferences.getDefaultDataDir());
             bcp.setProxyConfig(new CustomProxyConfig("http=127.0.0.1:10801;https=127.0.0.1:10801;socks=127.0.0.1:10801"));
@@ -31,24 +33,23 @@ public class BrowserUtil {
             preferences.setJavaScriptEnabled(false);
 
 //
-            JFrame frame = new JFrame();
-            frame.getContentPane().setEnabled(false);
-            frame.setSize(800, 600);
-            frame.getContentPane().setLayout(null);
-
-//            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            frame.setLocationByPlatform(true);
-            frame.setVisible(true);
-            BrowserView view = new BrowserView(browser);
-            view.setBounds(152, 39, 800, 600);
-            frame.getContentPane().add(view);
+//            JFrame frame = new JFrame();
+//            frame.getContentPane().setEnabled(false);
+//            frame.setSize(800, 600);
+//            frame.getContentPane().setLayout(null);
+//
+////            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//            frame.setLocationByPlatform(true);
+//            frame.setVisible(true);
+//            BrowserView view = new BrowserView(browser);
+//            view.setBounds(152, 39, 800, 600);
+//            frame.getContentPane().add(view);
 
 
             BrowserContext context = browser.getContext();
             context.getNetworkService().setNetworkDelegate(new DefaultNetworkDelegate() {
                 @Override
                 public void onCompleted(RequestCompletedParams params) {
-                    System.out.println("");
                     super.onCompleted(params);
                 }
 
@@ -76,24 +77,28 @@ public class BrowserUtil {
                     String url = params.getURL();
                     if (mimeType.contains("image")) {
                         String cacheKey = CacheUtil.getSaveCacheKey(url, null);
-
-                        if (CacheUtil.hasCache(cacheKey)) {
-                            byte[] bytes = CacheUtil.readByteCache(cacheKey);
-                            byte[] data = params.getData();
-                            int length = bytes.length + data.length;
-                            byte[] newByte = new byte[length];
-                            for (int i = 0; i < bytes.length; i++) {
-                                newByte[i] = bytes[i];
-                            }
-                            for (int i = 0; i < data.length; i++) {
-                                newByte[bytes.length + i] = bytes[i];
-                            }
-
-                            CacheUtil.setCache(cacheKey, newByte);
-                            return;
-                        }
                         byte[] data = params.getData();
-                        CacheUtil.setCache(cacheKey, data);
+
+                        if (bBytes.get() == null) {
+                            bBytes.set(data);
+                        } else {
+                            byte[] bytes = bBytes.get();
+                            int total = data.length + bytes.length;
+                            byte[] newB = new byte[total];
+                            System.arraycopy(bytes, 0, newB, 0, bytes.length);
+                            System.arraycopy(data, 0, newB, bytes.length, data.length);
+                            bBytes.set(newB);
+                        }
+                        String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
+                        String s = CacheUtil.readStrCache(cacheHeadKey);
+                        JSONObject obj = JSONUtil.parseObj(s);
+                        Object origSize = obj.get("content-length");
+                        Integer integer = Integer.valueOf(StringUtilIZLF.wrapperString(origSize));
+                        if (integer == bBytes.get().length) {
+                            CacheUtil.setCache(cacheKey, bBytes.get());
+                            bBytes.set(null);
+                        }
+
                     }
                     super.onDataReceived(params);
                 }
@@ -159,7 +164,7 @@ public class BrowserUtil {
             URL_CACHE.remove(url);
             return html;
         }
-        int i = 20;
+        int i = 100;
         int a = 0;
         while (a < i) {
             a++;
@@ -204,9 +209,9 @@ public class BrowserUtil {
         }
         ReentrantLock reentrantLock = new ReentrantLock();
         reentrantLock.lock();
-        getByteFormatHtml(url);
+        getByte(url);
         URL_CACHE.add(cacheUrl);
-        int i = 20;
+        int i = 100;
         int a = 0;
         while (a < i) {
             a++;
@@ -225,6 +230,6 @@ public class BrowserUtil {
     public static void main(String[] args) {
         //https://cdn-msp.18comic.vip/media/albums/393452_3x4.jpg?v=1677999015
 //        getHtml("https://cdn-msp.18comic.vip/media/albums/296782_3x4.jpg?v=1677941225");
-        getByte("https://cdn-msp.18comic.org/media/albums/352011_3x4.jpg?v=1677998986");
+        getByte("https://cdn-msp.18comic.vip/media/albums/352011_3x4.jpg?v=1677998986");
     }
 }
