@@ -210,6 +210,11 @@ public class BrowserUtil {
             e.printStackTrace();
         }
     }
+    public static void writeToResponse(String url, HttpServletResponse response) {
+        String cacheKey = CacheUtil.getSaveCacheKey(url, null);
+        String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
+        writeToResponse(cacheKey,cacheHeadKey,response);
+    }
 
     @SneakyThrows
     public static void getByteFromNetCAS(String url, HttpServletResponse response) {
