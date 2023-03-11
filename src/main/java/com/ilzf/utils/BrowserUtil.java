@@ -3,7 +3,7 @@ package com.ilzf.utils;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.ilzf.browser.LoadListenerImpl;
+import com.ilzf.browser.impl.LoadListenerImpl;
 import com.teamdev.jxbrowser.chromium.*;
 import com.teamdev.jxbrowser.chromium.events.*;
 //import com.teamdev.jxbrowser.chromium.swing.BrowserView;

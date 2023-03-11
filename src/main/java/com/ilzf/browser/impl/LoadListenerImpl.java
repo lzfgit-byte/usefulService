@@ -1,8 +1,6 @@
-package com.ilzf.browser;
+package com.ilzf.browser.impl;
 
-import com.ilzf.utils.CacheUtil;
-import com.ilzf.utils.StringUtilIZLF;
-import com.teamdev.jxbrowser.chromium.Browser;
+
 import com.teamdev.jxbrowser.chromium.events.*;
 import lombok.extern.slf4j.Slf4j;
 
