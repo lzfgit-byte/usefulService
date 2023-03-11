@@ -31,7 +31,14 @@ public class BrowserService {
     public final ThreadLocal<Map<String, byte[]>> bBytes = new ThreadLocal<>();
     private LinkedBlockingQueue<String> lbq = new LinkedBlockingQueue<>();
 
-    public void BrowserService() {
+    public BrowserService() {
+    }
+
+    public BrowserService(String url) {
+        String cacheKey = CacheUtil.getSaveCacheKey(url, null);
+        if (CacheUtil.hasCache(cacheKey)) {
+            return;
+        }
         BrowserContextParams bcp = new BrowserContextParams(BrowserPreferences.getDefaultDataDir());
         bcp.setProxyConfig(new CustomProxyConfig("http=127.0.0.1:10801;https=127.0.0.1:10801;socks=127.0.0.1:10801"));
         BrowserContext browserContext = new BrowserContext(bcp);
@@ -136,13 +143,16 @@ public class BrowserService {
 
 
     public void stopBrowser() {
-        browser.stop();
+        if (browser != null) {
+            browser.stop();
+        }
     }
 
     @SneakyThrows
     public String getHtml(String url) {
         String saveCacheKey = CacheUtil.getSaveCacheKey(url, "-html");
         if (CacheUtil.hasCache(saveCacheKey)) {
+            stopBrowser();
             return CacheUtil.readStrCache(saveCacheKey);
         }
         browser.loadURL(url);
@@ -152,6 +162,7 @@ public class BrowserService {
         sw.stop();
         log.info("获取:" + "[" + url + "]" + sw.getTotalTimeMillis());
         if (CacheUtil.hasCache(saveCacheKey)) {
+            stopBrowser();
             return CacheUtil.readStrCache(saveCacheKey);
         }
         return "";
@@ -192,6 +203,7 @@ public class BrowserService {
         String cacheHeadKey = CacheUtil.getSaveCacheKey(url, "-head");
         if (CacheUtil.hasCache(cacheKey)) {
             writeToResponse(cacheKey, cacheHeadKey, response);
+            stopBrowser();
             return;
         }
         browser.loadURL(url);
@@ -202,6 +214,7 @@ public class BrowserService {
         log.info("获取:" + "[" + url + "]" + sw.getTotalTimeMillis());
         if (CacheUtil.hasCache(cacheKey)) {
             writeToResponse(cacheKey, cacheHeadKey, response);
+            stopBrowser();
         }
     }
 

@@ -2,6 +2,7 @@ package com.ilzf.hWord.controller;
 
 import com.ilzf.base.annotation.RequestBodyJson;
 import com.ilzf.base.entity.ResultEntity;
+import com.ilzf.browser.service.BrowserService;
 import com.ilzf.hWord.service.HentaiWordParseService;
 import com.ilzf.utils.BrowserUtil;
 import com.ilzf.utils.NetUtilILZF;
@@ -83,7 +84,8 @@ public class HWordController {
     @RequestMapping("/getImgByte")
     public void getImgByte(@RequestParam("path") String path, HttpServletResponse response) {
 //        NetUtilILZF.getByteFromNet(path, response);
-
+//        String path_ = path.substring(0, path.indexOf("?"));
+//        new BrowserService(path_).getByte(path_, response);
         BrowserUtil.getByteFromNetCAS(path.substring(0, path.indexOf("?")), response);
     }
 
